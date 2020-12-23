@@ -34,6 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define FLASH_USER_START_ADDR   ADDR_FLASH_PAGE_128   /* FOR TESTING WE USE BANK2*/
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -54,6 +55,17 @@ FDCAN_RxHeaderTypeDef RxHeader;
 uint8_t TxData[8] = {0x10, 0x32, 0x54, 0x76, 0x98, 0x00, 0x11, 0x22};
 uint8_t RxData[8];
 
+/* Test Data to be programmed */
+  uint64_t Data64_to_write[32] = {
+  0x0000000000000000, 0x1111111111111111, 0x2222222222222222, 0x3333333333333333,
+  0x4444444444444444, 0x5555555555555555, 0x6666666666666666, 0x7777777777777777,
+  0x8888888888888888, 0x9999999999999999, 0xAAAAAAAAAAAAAAAA, 0xBBBBBBBBBBBBBBBB,
+  0xCCCCCCCCCCCCCCCC, 0xDDDDDDDDDDDDDDDD, 0xEEEEEEEEEEEEEEEE, 0xFFFFFFFFFFFFFFFF,
+  0x0011001100110011, 0x2233223322332233, 0x4455445544554455, 0x6677667766776677,
+  0x8899889988998899, 0xAABBAABBAABBAABB, 0xCCDDCCDDCCDDCCDD, 0xEEFFEEFFEEFFEEFF,
+  0x2200220022002200, 0x3311331133113311, 0x6644664466446644, 0x7755775577557755,
+  0xAA88AA88AA88AA88, 0xBB99BB99BB99BB99, 0xEECCEECCEECCEECC, 0xFFDDFFDDFFDDFFDD};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,6 +73,8 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void bootloader_JumpToUserApp(void);
 void test_can_init(void);
+void bootloader_FlashEraseBank2(void);
+void bootloader_FlashWrite(uint32_t StartAddress, uint64_t *DATA_64);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -99,7 +113,8 @@ int main(void)
   MX_FDCAN1_Init();
   /* USER CODE BEGIN 2 */
   // bootloader_JumpToUserApp();
-  test_can_init();
+  // test_can_init();
+  bootloader_FlashWrite(FLASH_USER_START_ADDR, Data64_to_write);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -245,6 +260,47 @@ void HAL_FDCAN_TxFifoEmptyCallback(FDCAN_HandleTypeDef *hfdcan)
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
 	HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &RxHeader, RxData);
+}
+/**
+  * @brief	This function erases Bank2 of the memory. (page 128 - page 255)
+  * @param 	None
+  * @retval	None
+  */
+void bootloader_FlashEraseBank2(void)
+{
+	FLASH_EraseInitTypeDef EraseInitStruct;
+	uint32_t BankNumber = 2;
+	// uint32_t PageNumber;
+	uint32_t PageError;
+	//uint32_t src_addr = (uint32_t)DATA_64;
+
+	/* Fill EraseInit structure*/
+	EraseInitStruct.TypeErase = FLASH_TYPEERASE_MASSERASE;
+	EraseInitStruct.Banks = BankNumber;
+
+	HAL_FLASHEx_Erase(&EraseInitStruct, &PageError);
+}
+/**
+  * @brief	This function writes 2KB starting from a given address
+  * @param	StartAddress is the starting address from where to start the flash write
+  * @param	DATA_64 is a pointer to an array of data to be written of size (32 x 64bit)
+  * @retval	None
+  */
+void bootloader_FlashWrite(uint32_t StartAddress, uint64_t *DATA_64)
+{
+	HAL_FLASH_Unlock();
+
+	// Delete memory bank 2 in order to be able to write
+	bootloader_FlashEraseBank2();
+
+	/* HAL_FLASH_Program() requires the address of the data to be flashed in integer
+	 * format (e.g. 0x2000008) and not pointer format. So we need to do the following
+	 * type casting.
+	 */
+	uint32_t data_address_uint = (uint32_t)DATA_64; // stores the address in integer format
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_FAST, StartAddress, (uint64_t)data_address_uint);
+
+	HAL_FLASH_Lock();
 }
 /* USER CODE END 4 */
 
