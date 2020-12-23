@@ -44,6 +44,15 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+extern FDCAN_HandleTypeDef hfdcan1;
+
+/* Global Variable */
+FDCAN_FilterTypeDef sFilterConfig;
+FDCAN_TxHeaderTypeDef TxHeader;
+FDCAN_RxHeaderTypeDef RxHeader;
+
+uint8_t TxData[8] = {0x10, 0x32, 0x54, 0x76, 0x98, 0x00, 0x11, 0x22};
+uint8_t RxData[8];
 
 /* USER CODE END PV */
 
@@ -51,6 +60,7 @@
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void bootloader_JumpToUserApp(void);
+void test_can_init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -88,7 +98,8 @@ int main(void)
   MX_GPIO_Init();
   MX_FDCAN1_Init();
   /* USER CODE BEGIN 2 */
-  bootloader_JumpToUserApp();
+  // bootloader_JumpToUserApp();
+  test_can_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -175,6 +186,65 @@ void bootloader_JumpToUserApp(void)
 
 	// call of user_reset handler starts execution of user app
 	user_reset_handler();
+}
+
+void test_can_init(void)
+{
+	// Configure the FDCAN filters
+	sFilterConfig.IdType = FDCAN_STANDARD_ID;
+	sFilterConfig.FilterIndex = 0;
+	sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
+	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+	sFilterConfig.FilterID1 = 0x000;
+	sFilterConfig.FilterID2 = 0x7FF;
+	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK)
+	{
+	Error_Handler();
+	}
+
+	// Configure TxHeader
+	TxHeader.Identifier = 0x00;
+	TxHeader.IdType = FDCAN_STANDARD_ID;
+	TxHeader.TxFrameType = FDCAN_DATA_FRAME;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_8;
+	TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+	TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
+	TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
+	TxHeader.TxEventFifoControl = FDCAN_STORE_TX_EVENTS;
+	TxHeader.MessageMarker = 0x00;
+
+	// Activate Interrupt Notifications
+	if (HAL_FDCAN_ActivateNotification(&hfdcan1,
+		  (FDCAN_IT_RX_FIFO0_NEW_MESSAGE), 0) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_FDCAN_ActivateNotification(&hfdcan1,
+			  (FDCAN_IT_TX_FIFO_EMPTY), 0) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	// Start FDCAN controller (continuous listening CAN bus)
+	if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	// Send a Hello message
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData);
+
+}
+
+void HAL_FDCAN_TxFifoEmptyCallback(FDCAN_HandleTypeDef *hfdcan)
+{
+	TxHeader.Identifier = 0x100;
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData);
+}
+
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
+{
+	HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &RxHeader, RxData);
 }
 /* USER CODE END 4 */
 
