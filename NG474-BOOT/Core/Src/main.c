@@ -49,7 +49,7 @@
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-
+void bootloader_JumpToUserApp(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -86,7 +86,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-
+  bootloader_JumpToUserApp();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -190,7 +190,26 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void bootloader_JumpToUserApp(void)
+{
+	// start of user flash
+	uint32_t USER_FLASH_ADDRESS = 0x08008000U;
 
+	// define a function pointer to user reset handler
+	void (*user_reset_handler)(void);
+
+	// set the MSP
+	// MSP located at start of user flash (@0x0800 8000)
+	uint32_t user_msp_value = *((volatile uint32_t *) USER_FLASH_ADDRESS);
+	__set_MSP(user_msp_value);
+
+	// reset handler address is the next location (@ 0x0800 8004)
+	uint32_t user_reset_handler_address = *((volatile uint32_t*) (USER_FLASH_ADDRESS + 4U));
+	user_reset_handler = (void*) user_reset_handler_address; // cast to function pointer
+
+	// call of user_reset handler starts execution of user app
+	user_reset_handler();
+}
 /* USER CODE END 4 */
 
 /**
