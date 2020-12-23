@@ -53,6 +53,8 @@ FDCAN_TxHeaderTypeDef TxHeader;
 FDCAN_RxHeaderTypeDef RxHeader;
 
 uint8_t TxData[8] = {0x10, 0x32, 0x54, 0x76, 0x98, 0x00, 0x11, 0x22};
+uint8_t page_complete_ack[1] = {0x00};
+uint8_t write_complete_ack[1] = {0xFF};
 uint8_t RxData[8];
 
 /* Test Data to be programmed */
@@ -66,6 +68,10 @@ uint8_t RxData[8];
   0x2200220022002200, 0x3311331133113311, 0x6644664466446644, 0x7755775577557755,
   0xAA88AA88AA88AA88, 0xBB99BB99BB99BB99, 0xEECCEECCEECCEECC, 0xFFDDFFDDFFDDFFDD};
 
+  uint64_t Received_Data64[32];
+  uint32_t received_data_index = 0;
+
+  uint32_t flash_write_address;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,6 +81,7 @@ void bootloader_JumpToUserApp(void);
 void test_can_init(void);
 void bootloader_FlashEraseBank2(void);
 void bootloader_FlashWrite(uint32_t StartAddress, uint64_t *DATA_64);
+uint64_t array_to_uint64(uint8_t *Array);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -113,8 +120,8 @@ int main(void)
   MX_FDCAN1_Init();
   /* USER CODE BEGIN 2 */
   // bootloader_JumpToUserApp();
-  // test_can_init();
-  bootloader_FlashWrite(FLASH_USER_START_ADDR, Data64_to_write);
+  test_can_init();
+  // bootloader_FlashWrite(FLASH_USER_START_ADDR, Data64_to_write);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -234,11 +241,11 @@ void test_can_init(void)
 	{
 		Error_Handler();
 	}
-	if (HAL_FDCAN_ActivateNotification(&hfdcan1,
-			  (FDCAN_IT_TX_FIFO_EMPTY), 0) != HAL_OK)
-	{
-		Error_Handler();
-	}
+	// if (HAL_FDCAN_ActivateNotification(&hfdcan1,
+	//		  (FDCAN_IT_TX_FIFO_EMPTY), 0) != HAL_OK)
+	//{
+	//	Error_Handler();
+	//}
 
 	// Start FDCAN controller (continuous listening CAN bus)
 	if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK)
@@ -248,18 +255,48 @@ void test_can_init(void)
 
 	// Send a Hello message
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData);
+	TxHeader.Identifier = 0x200;
 
 }
 
 void HAL_FDCAN_TxFifoEmptyCallback(FDCAN_HandleTypeDef *hfdcan)
 {
-	TxHeader.Identifier = 0x100;
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData);
+	// TxHeader.Identifier = 0x200;
+	// HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData);
 }
 
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
+	// Get message
 	HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &RxHeader, RxData);
+
+	// Convert to uint_64
+	Received_Data64[received_data_index] = array_to_uint64(RxData);
+	received_data_index++;
+
+	// Send ACK - resend frames
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, RxData);
+	TxHeader.Identifier += 1u;
+
+	if (received_data_index == 32u){
+		received_data_index = 0;
+		TxHeader.Identifier = 0x300;
+		TxHeader.DataLength = FDCAN_DLC_BYTES_1;
+
+		// Send ACK - Page complete, 32 values received
+		HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, page_complete_ack);
+
+		// Write page
+		bootloader_FlashWrite(FLASH_USER_START_ADDR, Received_Data64);
+
+		// Send ACK - Write page complete
+		TxHeader.Identifier = 0x400;
+		HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, write_complete_ack);
+
+		TxHeader.Identifier = 0x200;
+		TxHeader.DataLength = FDCAN_DLC_BYTES_8;
+	}
+
 }
 /**
   * @brief	This function erases Bank2 of the memory. (page 128 - page 255)
@@ -301,6 +338,23 @@ void bootloader_FlashWrite(uint32_t StartAddress, uint64_t *DATA_64)
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_FAST, StartAddress, (uint64_t)data_address_uint);
 
 	HAL_FLASH_Lock();
+}
+/**
+  * @brief	Converts an array of 8 uint8_t elements to a uint64_t
+  * @param	Array is an array of 8 uint8_t elements
+  * @retval	uint64_t converted value
+  */
+uint64_t array_to_uint64(uint8_t *Array)
+{
+	  int array_index;
+	  uint64_t Converted_Array = 0;
+	  for (array_index = 0; array_index < 7; array_index++)
+	  {
+		  Converted_Array += Array[array_index];
+		  Converted_Array = (Converted_Array << 8);
+	  }
+	  Converted_Array += Array[7];
+	  return Converted_Array;
 }
 /* USER CODE END 4 */
 
