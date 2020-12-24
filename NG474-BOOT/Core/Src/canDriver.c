@@ -249,6 +249,49 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 	// Get message
 	HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &RxHeader, RxData);
 
+	// Check what type of message it is (Host, Data)
+	switch (RxHeader.FilterIndex)
+		{
+		case CAN_HOST:
+			can_host_handler();
+			break;
+
+		case CAN_DATA:
+			can_data_handler();
+			break;
+
+		default:
+			// Other modes are not supported
+			break;
+		}
+}
+
+/**
+  * @brief	Handles HOST commands received in CAN Rx Callback
+  *			TODO: implement this function
+  * @param	None
+  * @retval	None
+  */
+void can_host_handler(void)
+{
+	//do nothing
+}
+
+/**
+  * @brief	Handles data received in CAN Rx Callback
+  * 		1) Checks if data received is the right data frame expected
+  * 		2) Message data is interpreted and stored in an array to be written in
+  * 		flash memory.
+  * 		3) An echo of the data is resent to host to check data and index number
+  * 		integrity.
+  * 		4) After 32 data messages have been received, data is stored in flash
+  * 		memory at the specified user location. Start and end of flash write
+  * 		are confirmed by CAN transmissions.
+  * @param	None
+  * @retval	None
+  */
+void can_data_handler(void)
+{
 	// Check if this is the right Data - index
 	if (RxHeader.Identifier != (0x100 + received_data_index))
 	{
@@ -281,3 +324,4 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 		}
 	} // else
 }
+
