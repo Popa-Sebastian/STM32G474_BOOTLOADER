@@ -30,6 +30,15 @@
 void can_init(void);
 
 /**
+  * @brief	Initializes CAN filters:
+  * 		1) Index 0, range 000 - 0FF, Host instructions
+  * 		2) Index 1, range 100 - 1FF, Data frames
+  * @param	None
+  * @retval	None
+  */
+void can_filter_init(void);
+
+/**
   * @brief	Sends ack page complete frame
   * 		ID = 0x300,
   * 		DATA[1]
