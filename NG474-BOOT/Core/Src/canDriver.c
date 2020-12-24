@@ -18,7 +18,6 @@ extern FDCAN_HandleTypeDef hfdcan1; // declared in fdcan.c
 
 /* Private variables ---------------------------------------------------------*/
 // CAN TypeDefs
-FDCAN_FilterTypeDef     sFilterConfig;
 FDCAN_TxHeaderTypeDef   TxHeader;
 FDCAN_RxHeaderTypeDef   RxHeader;
 
@@ -59,16 +58,7 @@ uint8_t RxData[8];
 void can_init(void)
 {
 	// Step1: Configure the FDCAN filters
-	sFilterConfig.IdType =      FDCAN_STANDARD_ID;        // STD ID
-	sFilterConfig.FilterIndex = 0;
-	sFilterConfig.FilterType =  FDCAN_FILTER_RANGE;
-	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0; // All msgs to FIFO0
-	sFilterConfig.FilterID1 =    0x000;
-	sFilterConfig.FilterID2 =    0x7FF;	                 // Accepts all msgs
-	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK)
-	{
-		Error_Handler();
-	}
+	can_filter_init();
 
 	// Step2: Configure global TxHeader attributes
 	TxHeader.IdType =           FDCAN_STANDARD_ID;
@@ -105,6 +95,42 @@ void can_init(void)
 	TxHeader.DataLength = FDCAN_DLC_BYTES_8;
 	uint8_t TxHello[8]  = {0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x21, 0x21};
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxHello);
+}
+
+/**
+  * @brief	Initializes CAN filters:
+  * 		1) Index 0, range 000 - 0FF, Host instructions
+  * 		2) Index 1, range 100 - 1FF, Data frames
+  * @param	None
+  * @retval	None
+  */
+void can_filter_init(void)
+{
+	FDCAN_FilterTypeDef     sFilterConfig;
+
+	// Configure global filter parameters
+	sFilterConfig.IdType =       FDCAN_STANDARD_ID;       // STD ID
+	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0; // All msgs to FIFO0
+
+	// 1) Configure FilterIndex 0 [000 - 0FF] to receive HOST commands
+	sFilterConfig.FilterIndex = CAN_HOST;
+	sFilterConfig.FilterType =  FDCAN_FILTER_RANGE;
+	sFilterConfig.FilterID1 =   0x000;
+	sFilterConfig.FilterID2 =   0x0FF;
+	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	// 2) Configure FilterIndex 1 [100 - 1FF] to receive data frames
+	sFilterConfig.FilterIndex = CAN_DATA;
+	sFilterConfig.FilterType =  FDCAN_FILTER_RANGE;
+	sFilterConfig.FilterID1 =   0x100;
+	sFilterConfig.FilterID2 =   0x1FF;
+	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
 }
 
 /**
