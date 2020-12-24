@@ -91,6 +91,7 @@ int main(void)
   MX_FDCAN1_Init();
   /* USER CODE BEGIN 2 */
   // bootloader_JumpToUserApp();
+  bootloader_FlashEraseBank2();
   can_init();
   // bootloader_FlashWrite(FLASH_USER_START_ADDR, Data64_to_write);
   /* USER CODE END 2 */
