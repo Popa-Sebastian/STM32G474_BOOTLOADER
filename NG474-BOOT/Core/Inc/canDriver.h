@@ -16,6 +16,13 @@
 #define FLASH_TEST_DATA         0
 #define FLASH_USER_START_ADDR   ADDR_FLASH_PAGE_128   /* FOR TESTING WE USE BANK2*/
 
+/* Private enums ------------------------------------------------------------*/
+typedef enum
+{
+	CAN_HOST = 0, /*!< \brief host message */
+	CAN_DATA = 1  /*!< \brief data message */
+} message_type;
+
 /* Private function prototypes -----------------------------------------------*/
 /**
   * @brief	Initializes Can Driver API:
@@ -38,6 +45,27 @@ void can_init(void);
   */
 void can_filter_init(void);
 
+/**
+  * @brief	Handles data received in Can Rx Callback
+  * 		1) Checks if data received is the right data frame expected
+  * 		2) Message data is interpreted and stored in an array to be written in
+  * 		flash memory.
+  * 		3) An echo of the data is resent to host to check data and index number
+  * 		integrity.
+  * 		4) After 32 data messages have been received, data is stored in flash
+  * 		memory at the specified user location. Start and end of flash write
+  * 		are confirmed by CAN transmissions.
+  * @param	None
+  * @retval	None
+  */
+void can_data_handler(void);
+
+/**
+  * @brief	Handles HOST commands received in CAN Rx Callback
+  * @param	None
+  * @retval	None
+  */
+void can_host_handler(void);
 /**
   * @brief	Sends ack page complete frame
   * 		ID = 0x300,
