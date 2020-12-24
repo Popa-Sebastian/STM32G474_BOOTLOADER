@@ -27,9 +27,6 @@ uint64_t Received_Data64[32];
 uint32_t received_data_index = 0;
 
 // Transmit Data:
-// ACK Data values
-uint8_t page_complete_ack[1]  = {0x00};
-uint8_t write_complete_ack[1] = {0xFF};
 
 #if FLASH_TEST_DATA > 0
 /* Test Data to be programmed */
@@ -111,6 +108,72 @@ void can_init(void)
 }
 
 /**
+  * @brief	Sends ack page complete frame
+  * 		ID = 0x300,
+  * 		DATA[1]
+  * 		[1]: 0x00
+  * @param	None
+  * @retval	None
+  */
+void can_ack_page_complete(void)
+{
+	uint8_t page_complete_ack[1]  = {0x00};
+	TxHeader.Identifier = 0x300;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, page_complete_ack);
+}
+
+/**
+  * @brief	Sends ack flash complete frame
+  * 		ID = 0x400,
+  * 		DATA[1]
+  * 		[1]: 0xFF
+  * @param	None
+  * @retval	None
+  */
+void can_acK_flash_complete(void)
+{
+	uint8_t write_complete_ack[1] = {0xFF};
+	TxHeader.Identifier = 0x400;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, write_complete_ack);
+}
+
+/**
+  * @brief	Sends ack and an echo of the received data
+  * 		ID = 0x200 + data_index
+  * 		DATA[8] = RxData
+  * @param	None
+  * @retval	None
+  */
+void can_ack_echo_data(void)
+{
+	TxHeader.Identifier = 0x200 + received_data_index;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_8;
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, RxData);
+}
+/**
+  * @brief	Sends a error frame if the received index is different than expected
+  * 		ID = 0x2FF,
+  * 		DATA[3]
+  * 		[1]: 0xFF
+  * 		[2]: expected index
+  * 		[3]: received index
+  * @param	None
+  * @retval	None
+  */
+void can_error_wrong_index(void)
+{
+	TxHeader.Identifier = 0x2FF;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_3;
+	uint8_t error_wrong_index[3];
+	error_wrong_index[0] = 0xFF;                        // error notification
+	error_wrong_index[1] = received_data_index;         // expected index
+	error_wrong_index[2] = RxHeader.Identifier - 0x100; // received index
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, error_wrong_index);
+}
+
+/**
   * @brief	Converts an array of 8 uint8_t elements to a uint64_t
   * @param	Array is an array of 8 uint8_t elements
   * @retval	uint64_t converted value
@@ -152,7 +215,7 @@ void HAL_FDCAN_TxFifoEmptyCallback(FDCAN_HandleTypeDef *hfdcan)
   * 		are confirmed by CAN transmissions.
   * @param	FDCAN_HandleTypeDef
   * @param	RxFifo0ITs can determine the cause of interrupt if multiple interrupts
-  * 		are enable for FIFO0.
+  * 		are enabled for FIFO0.
   * @retval	None
   */
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
@@ -160,33 +223,35 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 	// Get message
 	HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &RxHeader, RxData);
 
-	// Convert to uint_64
-	Received_Data64[received_data_index] = array_to_uint64(RxData);
-
-	// Send ACK - echo data frames;
-	TxHeader.Identifier = 0x200 + received_data_index;
-	TxHeader.DataLength = FDCAN_DLC_BYTES_8;
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, RxData);
-
-	// Increment data index
-	received_data_index++;
-
-	// Check for Page complete
-	if (received_data_index == 32u)
+	// Check if this is the right Data - index
+	if (RxHeader.Identifier != (0x100 + received_data_index))
 	{
-		received_data_index = 0;
+		// Error, data frames not in order
+		can_error_wrong_index();
+	} else
+	{
+		// Convert to uint_64
+		Received_Data64[received_data_index] = array_to_uint64(RxData);
 
-		// Send ACK - Page complete, 32 values received
-		TxHeader.Identifier = 0x300;
-		TxHeader.DataLength = FDCAN_DLC_BYTES_1;
-		HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, page_complete_ack);
+		// Send ACK - echo data frames;
+		can_ack_echo_data();
 
-		// Write page
-		bootloader_FlashWrite(FLASH_USER_START_ADDR, Received_Data64);
+		// Increment data index
+		received_data_index++;
 
-		// Send ACK - Write page complete
-		TxHeader.Identifier = 0x400;
-		TxHeader.DataLength = FDCAN_DLC_BYTES_1;
-		HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, write_complete_ack);
-	}
+		// Check for Page complete
+		if (received_data_index == 32u)
+		{
+			received_data_index = 0;
+
+			// Send ACK - Page complete, 32 values received
+			can_ack_page_complete();
+
+			// Write page
+			bootloader_FlashWrite(FLASH_USER_START_ADDR, Received_Data64);
+
+			// Send ACK - Write page complete
+			can_acK_flash_complete();
+		}
+	} // else
 }
