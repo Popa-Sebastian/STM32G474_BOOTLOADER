@@ -1,0 +1,43 @@
+; C:\Users\Sebastian\STM32CubeIDE\workspace_bootloader\PCAN_Tx\bootloader_test_paused.xmt
+;   CAN messages saved by PCAN-View v4.3.0.596
+;
+; Columns descriptions:
+; ~~~~~~~~~~~~~~~~~~~~~
+; +Message ID
+; |            +Cycle time in ms (0=manual)
+; |            |  +Data length
+; |            |  |  +Frame type
+; |            |  |  |  +Message data
+; |            |  |  |  |
+100h         100  8  D 00h 00h 00h 00h 00h 00h 00h 00h  Paused ; 00
+101h         101  8  D 11h 11h 11h 11h 11h 11h 11h 11h  Paused ; 01
+102h         102  8  D 22h 22h 22h 22h 22h 22h 22h 22h  Paused ; 02
+103h         103  8  D 33h 33h 33h 33h 33h 33h 33h 33h  Paused ; 03
+104h         104  8  D 44h 44h 44h 44h 44h 44h 44h 44h  Paused ; 04
+105h         105  8  D 55h 55h 55h 55h 55h 55h 55h 55h  Paused ; 05
+106h         106  8  D 66h 66h 66h 66h 66h 66h 66h 66h  Paused ; 06
+107h         107  8  D 77h 77h 77h 77h 77h 77h 77h 77h  Paused ; 07
+108h         108  8  D 88h 88h 88h 88h 88h 88h 88h 88h  Paused ; 08
+109h         109  8  D 99h 99h 99h 99h 99h 99h 99h 99h  Paused ; 09
+10Ah         110  8  D AAh AAh AAh AAh AAh AAh AAh AAh  Paused ; 10
+10Bh         111  8  D BBh BBh BBh BBh BBh BBh BBh BBh  Paused ; 11
+10Ch         112  8  D CCh CCh CCh CCh CCh CCh CCh CCh  Paused ; 12
+10Dh         113  8  D DDh DDh DDh DDh DDh DDh DDh DDh  Paused ; 13
+10Eh         114  8  D EEh EEh EEh EEh EEh EEh EEh EEh  Paused ; 14
+10Fh         115  8  D FFh FFh FFh FFh FFh FFh FFh FFh  Paused ; 15
+110h         116  8  D 00h 11h 00h 11h 00h 11h 00h 11h  Paused ; 16
+111h         117  8  D 22h 33h 22h 33h 22h 33h 22h 33h  Paused ; 17
+112h         118  8  D 44h 55h 44h 55h 44h 55h 44h 55h  Paused ; 18
+113h         119  8  D 66h 77h 66h 77h 66h 77h 66h 77h  Paused ; 19
+114h         120  8  D 88h 99h 88h 99h 88h 99h 88h 99h  Paused ; 20
+115h         121  8  D AAh BBh AAh BBh AAh BBh AAh BBh  Paused ; 21
+116h         122  8  D CCh DDh CCh DDh CCh DDh CCh DDh  Paused ; 22
+117h         123  8  D EEh FFh EEh FFh EEh FFh EEh FFh  Paused ; 23
+118h         124  8  D 22h 00h 22h 00h 22h 00h 22h 00h  Paused ; 24
+119h         125  8  D 33h 11h 33h 11h 33h 11h 33h 11h  Paused ; 25
+11Ah         126  8  D 66h 44h 66h 44h 66h 44h 66h 44h  Paused ; 26
+11Bh         127  8  D 77h 55h 77h 55h 77h 55h 77h 55h  Paused ; 27
+11Ch         128  8  D AAh 88h AAh 88h AAh 88h AAh 88h  Paused ; 28
+11Dh         129  8  D BBh 99h BBh 99h BBh 99h BBh 99h  Paused ; 29
+11Eh         130  8  D EEh CCh EEh CCh EEh CCh EEh CCh  Paused ; 30
+11Fh         131  8  D FFh DDh FFh DDh FFh DDh FFh DDh  Paused ; 31
