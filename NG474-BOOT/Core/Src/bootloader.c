@@ -49,10 +49,11 @@ void bootloader_JumpToUserApp(void)
 /**
   * @brief	This function erases Bank2 of the memory. (page 128 - page 255)
   * @param 	None
-  * @retval	None
+  * @retval	HAL_FLASH_GetError
   */
-void bootloader_FlashEraseBank2(void)
-{
+uint32_t bootloader_FlashEraseBank2(void)
+{	uint32_t Status = HAL_OK;
+	HAL_FLASH_Unlock();
 	FLASH_EraseInitTypeDef EraseInitStruct;
 	uint32_t BankNumber = 2;
 	// uint32_t PageNumber;
@@ -63,28 +64,58 @@ void bootloader_FlashEraseBank2(void)
 	EraseInitStruct.TypeErase = FLASH_TYPEERASE_MASSERASE;
 	EraseInitStruct.Banks = BankNumber;
 
-	HAL_FLASHEx_Erase(&EraseInitStruct, &PageError);
+	if (HAL_FLASHEx_Erase(&EraseInitStruct, &PageError) != HAL_OK)
+	{
+		Status = HAL_FLASH_GetError();
+	}
+	HAL_FLASH_Lock();
+	return Status;
+}
+
+/**
+  * @brief	This function erases a number of pages starting from the specifed
+  * 		page number
+  * @param 	Page, starting page to begin erase
+  * @param  Numberpages, how many pages to be erased
+  * @retval HAL_FLASH_GetError
+  */
+uint32_t bootloader_FlashErasePage(uint32_t Page, uint32_t NumberPages)
+{
+	uint32_t Status = HAL_OK;
+	FLASH_EraseInitTypeDef EraseInitStruct;
+	uint32_t PageError;
+
+	/* Fill EraseInit structure*/
+	EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
+	EraseInitStruct.Page = 		Page;
+	EraseInitStruct.NbPages = 	NumberPages;
+
+	if (HAL_FLASHEx_Erase(&EraseInitStruct, &PageError) != HAL_OK)
+	{
+		Status = HAL_FLASH_GetError();
+	}
+	return Status;
 }
 
 /**
   * @brief	This function writes 2KB of data starting from a given address
   * @param	StartAddress is the starting address from where to start the flash write
   * @param	DATA_64 is a pointer to an array of data to be written of size (32 x 64bit)
-  * @retval	None
+  * @retval	HAL_FLASH_GetError
   */
-void bootloader_FlashWrite(uint32_t StartAddress, uint64_t *DATA_64)
+uint32_t bootloader_FlashWrite(uint32_t StartAddress, uint64_t *DATA_64)
 {
+	uint32_t Status = HAL_OK;
 	HAL_FLASH_Unlock();
-
-	// Delete memory bank 2 in order to be able to write (pg 128 - pg 255)
-	bootloader_FlashEraseBank2();
-
 	/* HAL_FLASH_Program() requires the address of the data to be flashed in u_integer
 	 * format (e.g. 0x2000008) and not pointer format. So we need to do the following
 	 * type casting.
 	 */
 	uint32_t data_address_uint = (uint32_t)DATA_64; // stores the address in integer format
-	HAL_FLASH_Program(FLASH_TYPEPROGRAM_FAST, StartAddress, (uint64_t)data_address_uint);
-
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FAST, StartAddress, (uint64_t)data_address_uint) != HAL_OK)
+	{
+		Status = HAL_FLASH_GetError();
+	}
 	HAL_FLASH_Lock();
+	return Status;
 }
