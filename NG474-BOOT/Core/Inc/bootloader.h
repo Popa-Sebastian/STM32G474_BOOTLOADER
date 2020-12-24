@@ -25,16 +25,25 @@ void bootloader_JumpToUserApp(void);
 /**
   * @brief	This function erases Bank2 of the memory. (page 128 - page 255)
   * @param 	None
-  * @retval	None
+  * @retval	HAL_FLASH_GetError
   */
-void bootloader_FlashEraseBank2(void);
+uint32_t bootloader_FlashEraseBank2(void);
+
+/**
+  * @brief	This function erases a number of pages starting from the specifed
+  * 		page number
+  * @param 	Page, starting page to begin erase
+  * @param  Numberpages, how many pages to be erased
+  * @retval HAL_FLASH_GetError
+  */
+uint32_t bootloader_FlashErasePage(uint32_t Page, uint32_t NumberPages);
 
 /**
   * @brief	This function writes 2KB of data starting from a given address
   * @param	StartAddress is the starting address from where to start the flash write
   * @param	DATA_64 is a pointer to an array of data to be written of size (32 x 64bit)
-  * @retval	None
+  * @retval	HAL_FLASH_GetError
   */
-void bootloader_FlashWrite(uint32_t StartAddress, uint64_t *DATA_64);
+uint32_t bootloader_FlashWrite(uint32_t StartAddress, uint64_t *DATA_64);
 
 #endif /* INC_BOOTLOADER_H_ */
