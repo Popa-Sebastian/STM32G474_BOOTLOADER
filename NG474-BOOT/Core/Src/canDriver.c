@@ -200,6 +200,20 @@ void can_error_wrong_index(void)
 }
 
 /**
+  * @brief	Sends error frame when flash write fails
+  * 		ID = 0x7FF
+  * 		DATA[1] = 0XFF
+  * @param	None
+  * @retval	None
+  */
+void can_error_flash (void)
+{
+	TxHeader.Identifier = 0x7FF;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
+	uint8_t error_flash[1] = {0xFF};
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, error_flash);
+}
+/**
   * @brief	Converts an array of 8 uint8_t elements to a uint64_t
   * @param	Array is an array of 8 uint8_t elements
   * @retval	uint64_t converted value
@@ -317,10 +331,15 @@ void can_data_handler(void)
 			can_ack_page_complete();
 
 			// Write page
-			bootloader_FlashWrite(FLASH_USER_START_ADDR, Received_Data64);
-
-			// Send ACK - Write page complete
-			can_acK_flash_complete();
+			if (bootloader_FlashWrite(FLASH_USER_START_ADDR, Received_Data64) == HAL_OK)
+			{
+				// Send ACK - Write page complete
+				can_acK_flash_complete();
+			} else
+			{
+				// Send error
+				can_error_flash();
+			}
 		}
 	} // else
 }
