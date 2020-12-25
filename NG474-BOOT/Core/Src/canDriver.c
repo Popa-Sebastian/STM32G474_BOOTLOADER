@@ -271,7 +271,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 			break;
 
 		case CAN_DATA:
-			can_data_handler();
+			can_data_handler(RxHeader.Identifier, RxData);
 			break;
 
 		default:
@@ -301,20 +301,21 @@ void can_host_handler(void)
   * 		4) After 32 data messages have been received, data is stored in flash
   * 		memory at the specified user location. Start and end of flash write
   * 		are confirmed by CAN transmissions.
-  * @param	None
+  * @param	Identifier of the received message (corresponds to Data index)
+  * @param  rxdata_pt - pointer to received data to be stored
   * @retval	None
   */
-void can_data_handler(void)
+void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 {
 	// Check if this is the right Data - index
-	if (RxHeader.Identifier != (0x100 + received_data_index))
+	if (Identifier != (0x100 + received_data_index))
 	{
 		// Error, data frames not in order
 		can_error_wrong_index();
 	} else
 	{
 		// Convert to uint_64
-		Received_Data64[received_data_index] = array_to_uint64(RxData);
+		Received_Data64[received_data_index] = array_to_uint64(rxdata_pt);
 
 		// Send ACK - echo data frames;
 		can_ack_echo_data();
