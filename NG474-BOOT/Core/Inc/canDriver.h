@@ -69,3 +69,5 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
 void can_host_handler(void);
 
 #endif /* INC_CANDRIVER_H_ */
+
+/***************************END OF FILE****************************************/

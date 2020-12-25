@@ -21,3 +21,5 @@
 uint64_t array_to_uint64(uint8_t *Array);
 
 #endif /* INC_DATACONVERSION_H_ */
+
+/***************************END OF FILE****************************************/

@@ -47,3 +47,5 @@ uint32_t bootloader_FlashErasePage(uint32_t Page, uint32_t NumberPages);
 uint32_t bootloader_FlashWrite(uint32_t StartAddress, uint64_t *DATA_64);
 
 #endif /* INC_BOOTLOADER_H_ */
+
+/***************************END OF FILE****************************************/
