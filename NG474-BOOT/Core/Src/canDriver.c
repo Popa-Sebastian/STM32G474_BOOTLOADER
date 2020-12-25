@@ -135,22 +135,6 @@ void can_filter_init(void)
 }
 
 /**
-  * @brief	Sends ack page complete frame
-  * 		ID = 0x300,
-  * 		DATA[1]
-  * 		[1]: 0x00
-  * @param	None
-  * @retval	None
-  */
-void can_ack_page_complete(void)
-{
-	uint8_t page_complete_ack[1]  = {0x00};
-	TxHeader.Identifier = 0x300;
-	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, page_complete_ack);
-}
-
-/**
   * @brief	Sends ack flash complete frame
   * 		ID = 0x400,
   * 		DATA[1]
