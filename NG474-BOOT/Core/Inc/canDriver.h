@@ -69,16 +69,6 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
 void can_host_handler(void);
 
 /**
-  * @brief	Sends ack flash complete frame
-  * 		ID = 0x400,
-  * 		DATA[1]
-  * 		[1]: 0xFF
-  * @param	None
-  * @retval	None
-  */
-void can_acK_flash_complete(void);
-
-/**
   * @brief	Sends ack and an echo of the received data
   * 		ID = 0x200 + data_index
   * 		DATA[8] = RxData
