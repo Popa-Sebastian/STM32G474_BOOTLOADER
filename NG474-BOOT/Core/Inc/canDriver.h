@@ -67,15 +67,6 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
   * @retval	None
   */
 void can_host_handler(void);
-/**
-  * @brief	Sends ack page complete frame
-  * 		ID = 0x300,
-  * 		DATA[1]
-  * 		[1]: 0x00
-  * @param	None
-  * @retval	None
-  */
-void can_ack_page_complete(void);
 
 /**
   * @brief	Sends ack flash complete frame
