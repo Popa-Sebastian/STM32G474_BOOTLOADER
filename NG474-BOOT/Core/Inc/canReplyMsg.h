@@ -21,4 +21,14 @@
   */
 void can_ack_page_complete(void);
 
+/**
+  * @brief	Sends ack flash complete frame
+  * 		ID = 0x400,
+  * 		DATA[1]
+  * 		[1]: 0xFF
+  * @param	None
+  * @retval	None
+  */
+void can_acK_flash_complete(void);
+
 #endif /* INC_CANREPLYMSG_H_ */
