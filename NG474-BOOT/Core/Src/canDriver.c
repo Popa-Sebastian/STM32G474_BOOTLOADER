@@ -169,14 +169,15 @@ void can_acK_flash_complete(void)
   * @brief	Sends ack and an echo of the received data
   * 		ID = 0x200 + data_index
   * 		DATA[8] = RxData
-  * @param	None
+  * @param	data_index
+  * @param	rxdata_pt points to data to be echoed back
   * @retval	None
   */
-void can_ack_echo_data(void)
+void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt)
 {
-	TxHeader.Identifier = 0x200 + received_data_index;
+	TxHeader.Identifier = 0x200 + data_index;
 	TxHeader.DataLength = FDCAN_DLC_BYTES_8;
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, RxData);
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, rxdata_pt);
 }
 /**
   * @brief	Sends a error frame if the received index is different than expected
@@ -318,7 +319,7 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		Received_Data64[received_data_index] = array_to_uint64(rxdata_pt);
 
 		// Send ACK - echo data frames;
-		can_ack_echo_data();
+		can_ack_echo_data(received_data_index, rxdata_pt);
 
 		// Increment data index
 		received_data_index++;
