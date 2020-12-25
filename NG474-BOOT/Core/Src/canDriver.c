@@ -12,6 +12,7 @@
 #include "main.h"
 #include "canDriver.h"
 #include "bootloader.h"
+#include "canReplyMsg.h"
 
 /* Variables declared elsewhere-----------------------------------------------*/
 extern FDCAN_HandleTypeDef hfdcan1; // declared in fdcan.c
