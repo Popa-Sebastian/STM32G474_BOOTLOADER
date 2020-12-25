@@ -54,4 +54,13 @@ void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt);
   */
 void can_error_wrong_index(uint8_t expected_index, uint8_t received_index);
 
+/**
+  * @brief	Sends error frame when flash write fails
+  * 		ID = 0x7FF
+  * 		DATA[1] = 0XFF
+  * @param	None
+  * @retval	None
+  */
+void can_error_flash (void);
+
 #endif /* INC_CANREPLYMSG_H_ */
