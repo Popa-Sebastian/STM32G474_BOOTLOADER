@@ -42,10 +42,25 @@ void can_ack_page_complete(void)
   * @param	None
   * @retval	None
   */
-void can_acK_flash_complete(void)
+void can_ack_flash_complete(void)
 {
 	uint8_t write_complete_ack[1] = {0xFF};
 	TxHeader.Identifier = 0x400;
 	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, write_complete_ack);
+}
+
+/**
+  * @brief	Sends ack and an echo of the received data
+  * 		ID = 0x200 + data_index
+  * 		DATA[8] = RxData
+  * @param	data_index
+  * @param	rxdata_pt points to data to be echoed back
+  * @retval	None
+  */
+void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt)
+{
+	TxHeader.Identifier = 0x200 + data_index;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_8;
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, rxdata_pt);
 }

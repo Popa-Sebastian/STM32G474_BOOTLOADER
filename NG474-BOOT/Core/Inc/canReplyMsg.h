@@ -29,6 +29,16 @@ void can_ack_page_complete(void);
   * @param	None
   * @retval	None
   */
-void can_acK_flash_complete(void);
+void can_ack_flash_complete(void);
+
+/**
+  * @brief	Sends ack and an echo of the received data
+  * 		ID = 0x200 + data_index
+  * 		DATA[8] = RxData
+  * @param	data_index
+  * @param	rxdata_pt points to data to be echoed back
+  * @retval	None
+  */
+void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt);
 
 #endif /* INC_CANREPLYMSG_H_ */
