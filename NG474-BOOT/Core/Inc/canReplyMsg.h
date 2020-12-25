@@ -64,3 +64,5 @@ void can_error_wrong_index(uint8_t expected_index, uint8_t received_index);
 void can_error_flash (void);
 
 #endif /* INC_CANREPLYMSG_H_ */
+
+/***************************END OF FILE****************************************/
