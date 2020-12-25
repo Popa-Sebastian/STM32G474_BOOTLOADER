@@ -69,18 +69,6 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
 void can_host_handler(void);
 
 /**
-  * @brief	Sends a error frame if the received index is different than expected
-  * 		ID = 0x2FF,
-  * 		DATA[3]
-  * 		[1]: 0xFF
-  * 		[2]: expected index
-  * 		[3]: received index
-  * @param	None
-  * @retval	None
-  */
-void can_error_wrong_index(void);
-
-/**
   * @brief	Sends error frame when flash write fails
   * 		ID = 0x7FF
   * 		DATA[1] = 0XFF

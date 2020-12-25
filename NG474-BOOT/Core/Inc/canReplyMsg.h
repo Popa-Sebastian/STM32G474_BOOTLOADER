@@ -41,4 +41,17 @@ void can_ack_flash_complete(void);
   */
 void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt);
 
+/**
+  * @brief	Sends a error frame if the received index is different than expected
+  * 		ID = 0x2FF,
+  * 		DATA[3]
+  * 		[1]: 0xFF
+  * 		[2]: expected index
+  * 		[3]: received index
+  * @param	expected_index
+  * @param	received_index
+  * @retval	None
+  */
+void can_error_wrong_index(uint8_t expected_index, uint8_t received_index);
+
 #endif /* INC_CANREPLYMSG_H_ */

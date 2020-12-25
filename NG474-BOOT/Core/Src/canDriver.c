@@ -135,27 +135,6 @@ void can_filter_init(void)
 }
 
 /**
-  * @brief	Sends a error frame if the received index is different than expected
-  * 		ID = 0x2FF,
-  * 		DATA[3]
-  * 		[1]: 0xFF
-  * 		[2]: expected index
-  * 		[3]: received index
-  * @param	None
-  * @retval	None
-  */
-void can_error_wrong_index(void)
-{
-	TxHeader.Identifier = 0x2FF;
-	TxHeader.DataLength = FDCAN_DLC_BYTES_3;
-	uint8_t error_wrong_index[3];
-	error_wrong_index[0] = 0xFF;                        // error notification
-	error_wrong_index[1] = received_data_index;         // expected index
-	error_wrong_index[2] = RxHeader.Identifier - 0x100; // received index
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, error_wrong_index);
-}
-
-/**
   * @brief	Sends error frame when flash write fails
   * 		ID = 0x7FF
   * 		DATA[1] = 0XFF
@@ -267,7 +246,9 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 	if (Identifier != (0x100 + received_data_index))
 	{
 		// Error, data frames not in order
-		can_error_wrong_index();
+		uint8_t expected_index = (uint8_t)(received_data_index);
+		uint8_t received_index = (uint8_t)(Identifier - 0x100);
+		can_error_wrong_index(expected_index, received_index);
 	} else
 	{
 		// Convert to uint_64
