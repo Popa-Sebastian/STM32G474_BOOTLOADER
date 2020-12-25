@@ -46,7 +46,7 @@ void can_init(void);
 void can_filter_init(void);
 
 /**
-  * @brief	Handles data received in Can Rx Callback
+  * @brief	Handles data received in CAN Rx Callback
   * 		1) Checks if data received is the right data frame expected
   * 		2) Message data is interpreted and stored in an array to be written in
   * 		flash memory.
@@ -55,10 +55,11 @@ void can_filter_init(void);
   * 		4) After 32 data messages have been received, data is stored in flash
   * 		memory at the specified user location. Start and end of flash write
   * 		are confirmed by CAN transmissions.
-  * @param	None
+  * @param	Identifier of the received message (corresponds to Data index)
+  * @param  rxdata_pt - pointer to received data to be stored
   * @retval	None
   */
-void can_data_handler(void);
+void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
 
 /**
   * @brief	Handles HOST commands received in CAN Rx Callback
