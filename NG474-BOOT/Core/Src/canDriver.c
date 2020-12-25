@@ -135,22 +135,6 @@ void can_filter_init(void)
 }
 
 /**
-  * @brief	Sends ack flash complete frame
-  * 		ID = 0x400,
-  * 		DATA[1]
-  * 		[1]: 0xFF
-  * @param	None
-  * @retval	None
-  */
-void can_acK_flash_complete(void)
-{
-	uint8_t write_complete_ack[1] = {0xFF};
-	TxHeader.Identifier = 0x400;
-	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, write_complete_ack);
-}
-
-/**
   * @brief	Sends ack and an echo of the received data
   * 		ID = 0x200 + data_index
   * 		DATA[8] = RxData
