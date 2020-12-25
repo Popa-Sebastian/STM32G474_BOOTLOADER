@@ -69,16 +69,6 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
 void can_host_handler(void);
 
 /**
-  * @brief	Sends ack and an echo of the received data
-  * 		ID = 0x200 + data_index
-  * 		DATA[8] = RxData
-  * @param	data_index
-  * @param	rxdata_pt points to data to be echoed back
-  * @retval	None
-  */
-void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt);
-
-/**
   * @brief	Sends a error frame if the received index is different than expected
   * 		ID = 0x2FF,
   * 		DATA[3]

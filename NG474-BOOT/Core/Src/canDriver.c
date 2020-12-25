@@ -135,20 +135,6 @@ void can_filter_init(void)
 }
 
 /**
-  * @brief	Sends ack and an echo of the received data
-  * 		ID = 0x200 + data_index
-  * 		DATA[8] = RxData
-  * @param	data_index
-  * @param	rxdata_pt points to data to be echoed back
-  * @retval	None
-  */
-void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt)
-{
-	TxHeader.Identifier = 0x200 + data_index;
-	TxHeader.DataLength = FDCAN_DLC_BYTES_8;
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, rxdata_pt);
-}
-/**
   * @brief	Sends a error frame if the received index is different than expected
   * 		ID = 0x2FF,
   * 		DATA[3]
@@ -305,7 +291,7 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			if (bootloader_FlashWrite(FLASH_USER_START_ADDR, Received_Data64) == HAL_OK)
 			{
 				// Send ACK - Write page complete
-				can_acK_flash_complete();
+				can_ack_flash_complete();
 			} else
 			{
 				// Send error
