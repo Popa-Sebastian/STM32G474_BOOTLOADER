@@ -101,3 +101,5 @@ void can_error_flash (void)
 	uint8_t error_flash[1] = {0xFF};
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, error_flash);
 }
+
+/***************************END OF FILE****************************************/
