@@ -30,3 +30,6 @@ uint64_t array_to_uint64(uint8_t *Array)
 	converted_value += Array[7];
 	return converted_value;
 }
+
+/***************************END OF FILE****************************************/
+
