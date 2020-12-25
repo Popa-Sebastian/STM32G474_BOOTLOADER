@@ -64,3 +64,25 @@ void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt)
 	TxHeader.DataLength = FDCAN_DLC_BYTES_8;
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, rxdata_pt);
 }
+
+/**
+  * @brief	Sends a error frame if the received index is different than expected
+  * 		ID = 0x2FF,
+  * 		DATA[3]
+  * 		[1]: 0xFF
+  * 		[2]: expected index
+  * 		[3]: received index
+  * @param	expected_index
+  * @param	received_index
+  * @retval	None
+  */
+void can_error_wrong_index(uint8_t expected_index, uint8_t received_index)
+{
+	TxHeader.Identifier = 0x2FF;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_3;
+	uint8_t error_wrong_index[3];
+	error_wrong_index[0] = 0xFF;              // error notification
+	error_wrong_index[1] = expected_index;    // expected index
+	error_wrong_index[2] = received_index;    // received index
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, error_wrong_index);
+}
