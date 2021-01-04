@@ -14,9 +14,11 @@
 #include "bootloader.h"
 #include "canReplyMsg.h"
 #include "dataConversion.h"
+#include "timer.h"
 
 /* Variables declared elsewhere-----------------------------------------------*/
 extern FDCAN_HandleTypeDef hfdcan1; // declared in fdcan.c
+extern TIM_HandleTypeDef htim16; // declared in tim.c
 
 /* Private variables ---------------------------------------------------------*/
 // CAN TypeDefs
@@ -204,7 +206,8 @@ void can_host_handler(uint32_t identifier, uint8_t *Data_pt)
 	switch (identifier)
 		{
 		case HOST_ENTER_BOOTLOADER:
-			// TODO: enter bootloader mode:
+			HAL_TIM_Base_Stop_IT(&htim16); // stop timer
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET); // LED off
 			break;
 
 		case HOST_USER_ADDRESS:
