@@ -175,11 +175,19 @@ RCC.VCOInputFreq_Value=16000000
 RCC.VCOOutputFreq_Value=320000000
 SH.GPXTI13.0=GPIO_EXTI13
 SH.GPXTI13.ConfNb=1
+<<<<<<< HEAD
 TIM16.AutoReloadPreload=TIM_AUTORELOAD_PRELOAD_ENABLE
 TIM16.IPParameters=Prescaler,PeriodNoDither,AutoReloadPreload,RepetitionCounter
 TIM16.PeriodNoDither=5000-1
 TIM16.Prescaler=160
 TIM16.RepetitionCounter=100
+=======
+TIM16.AutoReloadPreload=TIM_AUTORELOAD_PRELOAD_DISABLE
+TIM16.IPParameters=Prescaler,PeriodNoDither,AutoReloadPreload,RepetitionCounter
+TIM16.PeriodNoDither=5000-1
+TIM16.Prescaler=160
+TIM16.RepetitionCounter=200
+>>>>>>> a513852 (Implement jump to user app in interrupt)
 VP_SYS_VS_DBSignals.Mode=DisableDeadBatterySignals
 VP_SYS_VS_DBSignals.Signal=SYS_VS_DBSignals
 VP_SYS_VS_Systick.Mode=SysTick

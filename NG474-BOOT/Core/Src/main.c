@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "bootloader.h"
 #include "canDriver.h"
+#include "timer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,6 +96,7 @@ int main(void)
   // bootloader_JumpToUserApp();
   bootloader_FlashEraseBank2();
   can_init();
+  start_timer();
   // bootloader_FlashWrite(FLASH_USER_START_ADDR, Data64_to_write);
   /* USER CODE END 2 */
 
