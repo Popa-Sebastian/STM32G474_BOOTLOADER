@@ -82,10 +82,10 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
   *			3) HOST_JUMP_TO_APP: after a successful bootloader and flash of the
   *			of the user app, this command makes the jump to user app.
   * @param	Identifier corresponds to the command issued by HOST
-  * @param  Data_pt, pointer to data
+  * @param  rxdata_pt, pointer to data
   * @retval	None
   */
-void can_host_handler(uint32_t Identifier, uint8_t *Data_pt);
+void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt);
 
 #endif /* INC_CANDRIVER_H_ */
 
