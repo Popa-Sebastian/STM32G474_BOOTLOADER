@@ -29,6 +29,9 @@ FDCAN_RxHeaderTypeDef   RxHeader;
 uint64_t Received_Data64[32];
 uint32_t received_data_index = 0;
 
+// Starting flash address for testing (start of memory bank2)
+uint32_t flash_address = ((uint32_t)0x08040000);
+
 // Transmit Data:
 
 #if FLASH_TEST_DATA > 0
@@ -268,10 +271,12 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			can_ack_page_complete();
 
 			// Write page
-			if (bootloader_FlashWrite(FLASH_USER_START_ADDR, Received_Data64) == HAL_OK)
+			if (bootloader_FlashWrite(flash_address, Received_Data64) == HAL_OK)
 			{
 				// Send ACK - Write page complete
 				can_ack_flash_complete();
+				// Update new flash address for next 256bytes
+				flash_address = flash_address + (32u * sizeof(uint64_t));
 			} else
 			{
 				// Send error
