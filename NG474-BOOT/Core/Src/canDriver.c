@@ -27,7 +27,7 @@ FDCAN_RxHeaderTypeDef   RxHeader;
 
 // User variables
 uint64_t Received_Data64[32];
-uint32_t received_data_index = 0;
+uint32_t current_data_index = 0;
 uint32_t FLASH_OK = 1;
 
 // Starting flash address for testing (start of memory bank2)
@@ -254,27 +254,27 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 	// FLASH_OK is 0 while receiving data
 	FLASH_OK = 0;
 	// Check if this is the right Data - index
-	if (Identifier != (0x100 + received_data_index))
+	if (Identifier != (0x100 + current_data_index))
 	{
 		// Error, data frames not in order
-		uint8_t expected_index = (uint8_t)(received_data_index);
+		uint8_t expected_index = (uint8_t)(current_data_index);
 		uint8_t received_index = (uint8_t)(Identifier - 0x100);
 		can_error_wrong_index(expected_index, received_index);
 	} else
 	{
 		// Convert to uint_64
-		Received_Data64[received_data_index] = array_to_uint64(rxdata_pt);
+		Received_Data64[current_data_index] = array_to_uint64(rxdata_pt);
 
 		// Send ACK - echo data frames;
-		can_ack_echo_data(received_data_index, rxdata_pt);
+		can_ack_echo_data(current_data_index, rxdata_pt);
 
 		// Increment data index
-		received_data_index++;
+		current_data_index++;
 
 		// Check for Page complete
-		if (received_data_index == 32u)
+		if (current_data_index == 32u)
 		{
-			received_data_index = 0;
+			current_data_index = 0;
 
 			// Send ACK - Page complete, 32 values received
 			can_ack_page_complete();
