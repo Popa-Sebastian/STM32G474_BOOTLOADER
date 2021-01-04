@@ -171,7 +171,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 	switch (RxHeader.FilterIndex)
 		{
 		case CAN_HOST:
-			can_host_handler();
+			can_host_handler(RxHeader.Identifier, RxData);
 			break;
 
 		case CAN_DATA:
@@ -186,13 +186,40 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 
 /**
   * @brief	Handles HOST commands received in CAN Rx Callback
-  *			TODO: implement this function
-  * @param	None
+  *			Supported modes:
+  *			1) HOST_ENTER_BOOTLOADER: after MCU reset, bootloader app waits for
+  *			a determined amount of time and looks for a HOST_ENTER_BOOTLOADER
+  *			command to enter bootloader mode.
+  *			2) HOST_USER_ADDRESS: specifies the start of the user flash memory
+  *			address, where the user app will be stored.
+  *			3) HOST_JUMP_TO_APP: after a successful bootloader and flash of the
+  *			of the user app, this command makes the jump to user app.
+  * @param	Identifier corresponds to the command issued by HOST
+  * @param  Data_pt, pointer to data
   * @retval	None
   */
-void can_host_handler(void)
+void can_host_handler(uint32_t identifier, uint8_t *Data_pt)
 {
-	//do nothing
+	// Check what command it is
+	switch (identifier)
+		{
+		case HOST_ENTER_BOOTLOADER:
+			// TODO: enter bootloader mode:
+			break;
+
+		case HOST_USER_ADDRESS:
+			// TODO: change user app address
+			break;
+
+		case HOST_JUMP_TO_APP:
+			// TODO: check to see if everything is ok and then jump
+			bootloader_JumpToUserApp();
+			break;
+
+		default:
+			// Other modes are not supported
+			break;
+		}
 }
 
 /**
