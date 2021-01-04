@@ -12,7 +12,8 @@
 #define INC_TIMER_H_
 
 /* Functions declaration- ----------------------------------------------------*/
-/**
+/***************************start_timer*****************************************
+ **
   * @brief	Starts Timer 16 that waits for 5 sec to receive a message from host
   * 		to enter bootloader mode. If message is received, timer is stopped.
   * 		Else, in the timer interrupt HAL_TIM_PeriodElapsedCallback, jump to

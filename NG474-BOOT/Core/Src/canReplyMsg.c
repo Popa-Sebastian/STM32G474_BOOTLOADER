@@ -18,7 +18,8 @@ extern FDCAN_TxHeaderTypeDef TxHeader; // declared in canDriver.c
 /* Private variables ---------------------------------------------------------*/
 
 /* Functions declaration- ----------------------------------------------------*/
-/**
+/*********************can_ack_page_complete*************************************
+ **
   * @brief	Sends ack page complete frame
   * 		ID = 0x300,
   * 		DATA[1]
@@ -34,7 +35,8 @@ void can_ack_page_complete(void)
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, page_complete_ack);
 }
 
-/**
+/*********************can_ack_flash_complete************************************
+ **
   * @brief	Sends ack flash complete frame
   * 		ID = 0x400,
   * 		DATA[1]
@@ -50,7 +52,8 @@ void can_ack_flash_complete(void)
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, write_complete_ack);
 }
 
-/**
+/***********************can_ack_echo_data***************************************
+ **
   * @brief	Sends ack and an echo of the received data
   * 		ID = 0x200 + data_index
   * 		DATA[8] = RxData
@@ -65,7 +68,8 @@ void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt)
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, rxdata_pt);
 }
 
-/**
+/**********************can_error_wrong_index************************************
+ **
   * @brief	Sends a error frame if the received index is different than expected
   * 		ID = 0x2FF,
   * 		DATA[3]
@@ -87,7 +91,8 @@ void can_error_wrong_index(uint8_t expected_index, uint8_t received_index)
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, error_wrong_index);
 }
 
-/**
+/*************************can_error_flash***************************************
+ **
   * @brief	Sends error frame when flash write fails
   * 		ID = 0x7FF
   * 		DATA[1] = 0XFF

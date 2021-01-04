@@ -17,6 +17,9 @@
 #define FLASH_USER_START_ADDR   ADDR_FLASH_PAGE_128   /* FOR TESTING WE USE BANK2*/
 
 /* Private enums ------------------------------------------------------------*/
+/**
+  * @brief	Receive filters
+  */
 typedef enum
 {
 	CAN_HOST = 0, /*!< \brief host message */
@@ -34,7 +37,8 @@ typedef enum
 } host_command_type;
 
 /* Private function prototypes -----------------------------------------------*/
-/**
+/****************************can_init*******************************************
+ **
   * @brief	Initializes Can Driver API:
   * 		1) Configures receive filters
   * 		2) Configures global TxHeader
@@ -46,7 +50,8 @@ typedef enum
   */
 void can_init(void);
 
-/**
+/************************can_filter_init****************************************
+ **
   * @brief	Initializes CAN filters:
   * 		1) Index 0, range 000 - 0FF, Host instructions
   * 		2) Index 1, range 100 - 1FF, Data frames
@@ -55,7 +60,8 @@ void can_init(void);
   */
 void can_filter_init(void);
 
-/**
+/***************************can_data_handler************************************
+ **
   * @brief	Handles data received in CAN Rx Callback
   * 		1) Checks if data received is the right data frame expected
   * 		2) Message data is interpreted and stored in an array to be written in
@@ -71,7 +77,8 @@ void can_filter_init(void);
   */
 void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
 
-/**
+/***************************can_host_handler************************************
+ **
   * @brief	Handles HOST commands received in CAN Rx Callback
   *			Supported modes:
   *			1) HOST_ENTER_BOOTLOADER: after MCU reset, bootloader app waits for
