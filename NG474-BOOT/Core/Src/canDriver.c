@@ -53,7 +53,8 @@ uint64_t Data64_to_write[32] = {
 uint8_t RxData[8];
 
 /* Functions declaration- ----------------------------------------------------*/
-/**
+/****************************can_init*******************************************
+ **
   * @brief	Initializes Can Driver API:
   * 		1) Configures receive filters
   * 		2) Configures global TxHeader
@@ -105,7 +106,8 @@ void can_init(void)
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxHello);
 }
 
-/**
+/************************can_filter_init****************************************
+ **
   * @brief	Initializes CAN filters:
   * 		1) Index 0, range 000 - 0FF, Host instructions
   * 		2) Index 1, range 100 - 1FF, Data frames
@@ -149,7 +151,8 @@ void HAL_FDCAN_TxFifoEmptyCallback(FDCAN_HandleTypeDef *hfdcan)
 }
 #endif
 
-/**
+/***********************HAL_FDCAN_RxFifo0Callback*******************************
+ **
   * @brief	Message Received in Fifo0 Callback.
   * 		- This function is called by the HAL_FDCAN_IRQHandler. The IRQHandler
   * 		determines the cause of the interrupt, acknowledges the interrupt
@@ -190,7 +193,8 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 		}
 }
 
-/**
+/***************************can_host_handler************************************
+ **
   * @brief	Handles HOST commands received in CAN Rx Callback
   *			Supported modes:
   *			1) HOST_ENTER_BOOTLOADER: after MCU reset, bootloader app waits for
@@ -217,7 +221,7 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			break;
 
 		case HOST_USER_ADDRESS:
-			// change flash address
+			// Change flash address
 			flash_address = array_to_uint32(rxdata_pt);
 			break;
 
@@ -235,7 +239,8 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		}
 }
 
-/**
+/***************************can_data_handler************************************
+ **
   * @brief	Handles data received in CAN Rx Callback
   * 		1) Checks if data received is the right data frame expected
   * 		2) Message data is interpreted and stored in an array to be written in

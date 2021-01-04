@@ -13,14 +13,16 @@
 #define INC_DATACONVERSION_H_
 
 /* Private function prototypes -----------------------------------------------*/
-/**
+/*************************array_to_uint64***************************************
+ **
   * @brief	Converts an array of 8 uint8_t elements to a uint64_t
   * @param	Array is an array of 8 uint8_t elements
   * @retval	uint64_t converted value
   */
 uint64_t array_to_uint64(uint8_t *Array);
 
-/**
+/*************************array_to_uint32***************************************
+ **
   * @brief	Converts an array of 4 uint8_t elements to a uint32_t
   * @param	Array is an array of 4 uint8_t elements
   * @retval	uint32_t converted value
