@@ -28,6 +28,7 @@ FDCAN_RxHeaderTypeDef   RxHeader;
 // User variables
 uint64_t Received_Data64[32];
 uint32_t received_data_index = 0;
+uint32_t FLASH_OK = 1;
 
 // Starting flash address for testing (start of memory bank2)
 uint32_t flash_address = ((uint32_t)0x08040000);
@@ -211,6 +212,8 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		case HOST_ENTER_BOOTLOADER:
 			HAL_TIM_Base_Stop_IT(&htim16); // stop timer
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET); // LED off
+			// In bootloader mode flash is not OK until successful flash write
+			FLASH_OK = 0;
 			break;
 
 		case HOST_USER_ADDRESS:
@@ -219,8 +222,11 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			break;
 
 		case HOST_JUMP_TO_APP:
-			// TODO: check to see if everything is ok and then jump
-			bootloader_JumpToUserApp();
+			// Check to see if everything is ok and then jump
+			if (FLASH_OK)
+			{
+				bootloader_JumpToUserApp();
+			}
 			break;
 
 		default:
@@ -245,6 +251,8 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
   */
 void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 {
+	// FLASH_OK is 0 while receiving data
+	FLASH_OK = 0;
 	// Check if this is the right Data - index
 	if (Identifier != (0x100 + received_data_index))
 	{
@@ -276,6 +284,8 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			{
 				// Send ACK - Write page complete
 				can_ack_flash_complete();
+				// Set FLASH OK
+				FLASH_OK = 1;
 				// Update new flash address for next 256bytes
 				flash_address = flash_address + (32u * sizeof(uint64_t));
 			} else
