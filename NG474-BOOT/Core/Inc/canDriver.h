@@ -23,6 +23,16 @@ typedef enum
 	CAN_DATA = 1  /*!< \brief data message */
 } message_type;
 
+/**
+  * @brief	HOST to bootloader commands
+  */
+typedef enum
+{
+	HOST_ENTER_BOOTLOADER = 0x00,
+	HOST_USER_ADDRESS =     0x10,
+	HOST_JUMP_TO_APP =      0x90
+} host_command_type;
+
 /* Private function prototypes -----------------------------------------------*/
 /**
   * @brief	Initializes Can Driver API:
@@ -63,10 +73,19 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
 
 /**
   * @brief	Handles HOST commands received in CAN Rx Callback
-  * @param	None
+  *			Supported modes:
+  *			1) HOST_ENTER_BOOTLOADER: after MCU reset, bootloader app waits for
+  *			a determined amount of time and looks for a HOST_ENTER_BOOTLOADER
+  *			command to enter bootloader mode.
+  *			2) HOST_USER_ADDRESS: specifies the start of the user flash memory
+  *			address, where the user app will be stored.
+  *			3) HOST_JUMP_TO_APP: after a successful bootloader and flash of the
+  *			of the user app, this command makes the jump to user app.
+  * @param	Identifier corresponds to the command issued by HOST
+  * @param  Data_pt, pointer to data
   * @retval	None
   */
-void can_host_handler(void);
+void can_host_handler(uint32_t Identifier, uint8_t *Data_pt);
 
 #endif /* INC_CANDRIVER_H_ */
 
