@@ -214,9 +214,8 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			break;
 
 		case HOST_USER_ADDRESS:
-			// change user app address
-
-
+			// change flash address
+			flash_address = array_to_uint32(rxdata_pt);
 			break;
 
 		case HOST_JUMP_TO_APP:
