@@ -200,13 +200,13 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
   *			3) HOST_JUMP_TO_APP: after a successful bootloader and flash of the
   *			of the user app, this command makes the jump to user app.
   * @param	Identifier corresponds to the command issued by HOST
-  * @param  Data_pt, pointer to data
+  * @param  rxdata_pt, pointer to data
   * @retval	None
   */
-void can_host_handler(uint32_t identifier, uint8_t *Data_pt)
+void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 {
 	// Check what command it is
-	switch (identifier)
+	switch (Identifier)
 		{
 		case HOST_ENTER_BOOTLOADER:
 			HAL_TIM_Base_Stop_IT(&htim16); // stop timer
@@ -214,7 +214,9 @@ void can_host_handler(uint32_t identifier, uint8_t *Data_pt)
 			break;
 
 		case HOST_USER_ADDRESS:
-			// TODO: change user app address
+			// change user app address
+
+
 			break;
 
 		case HOST_JUMP_TO_APP:
