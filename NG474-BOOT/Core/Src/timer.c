@@ -17,7 +17,8 @@
 extern TIM_HandleTypeDef htim16; // declared in tim.c
 
 /* Functions declaration- ----------------------------------------------------*/
-/**
+/***************************start_timer*****************************************
+ **
   * @brief	Starts Timer 16 that waits for 5 sec to receive a message from host
   * 		to enter bootloader mode. If message is received, timer is stopped.
   * 		Else, in the timer interrupt HAL_TIM_PeriodElapsedCallback, jump to
@@ -30,7 +31,8 @@ void start_timer(void)
 	HAL_TIM_Base_Start_IT(&htim16);
 }
 
-/**
+/******************HAL_TIM_PeriodElapsedCallback********************************
+ **
   * @brief	Timer16 interrupt handler. After time is elapsed, with no start
   * 		bootloader mode from host, jump to user app function is called.
   * @param	htim, determine which timer caused the interrupt (if more timers are
