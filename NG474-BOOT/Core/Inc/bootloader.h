@@ -17,11 +17,10 @@
   *         Gets the user app Main Stack Pointer (MSP) and the address of the
   *         user app reset_handler() function.
   *         Calls user app reset_handler() to start execution of user app.
-  * @param  None
-  *         TODO: add input paramter of type uint32_t for memory address.
+  * @param  user_flash represents start of user flash memory address
   * @retval None
   */
-void bootloader_JumpToUserApp(void);
+void bootloader_JumpToUserApp(uint32_t user_flash);
 
 /*********************bootloader_FlashEraseBank2********************************
  **
