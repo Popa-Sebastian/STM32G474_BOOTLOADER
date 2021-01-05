@@ -1,3 +1,5 @@
 FLASH_FastProgram/
+FLASH_EraseProgram/
 
+.gitignore
 .metadata
