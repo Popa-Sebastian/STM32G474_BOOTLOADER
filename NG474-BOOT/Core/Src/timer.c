@@ -15,6 +15,7 @@
 
 /* Variables declared elsewhere-----------------------------------------------*/
 extern TIM_HandleTypeDef htim16; // declared in tim.c
+extern uint32_t start_of_user_flash; // declared in canDriver.c
 
 /* Functions declaration- ----------------------------------------------------*/
 /***************************start_timer*****************************************
@@ -48,7 +49,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	 count++;
 	 if (count == 10)
 	 {
-		 bootloader_JumpToUserApp();
+		 bootloader_JumpToUserApp(start_of_user_flash);
 	 }
 }
 

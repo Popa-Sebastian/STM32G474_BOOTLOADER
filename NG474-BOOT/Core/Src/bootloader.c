@@ -22,25 +22,22 @@
   *         Gets the user app Main Stack Pointer (MSP) and the address of the
   *         user app reset_handler() function.
   *         Calls user app reset_handler() to start execution of user app.
-  * @param  None
-  *         TODO: add input paramter of type uint32_t for memory address.
+  * @param  user_flash represents start of user flash memory address
   * @retval None
   */
-void bootloader_JumpToUserApp(void)
+void bootloader_JumpToUserApp(uint32_t user_flash)
 {
-	// start of user flash
-	uint32_t USER_FLASH_ADDRESS = 0x08008000U;
 
 	// define a function pointer to user reset handler
 	void (*user_reset_handler)(void);
 
 	// set the MSP
-	// MSP located at start of user flash (@0x0800 8000)
-	uint32_t user_msp_value = *((volatile uint32_t *) USER_FLASH_ADDRESS);
+	// MSP located at start of user flash (eg: @0x0800 8000)
+	uint32_t user_msp_value = *((volatile uint32_t *) user_flash);
 	__set_MSP(user_msp_value);
 
-	// reset handler address is the next location (@ 0x0800 8004)
-	uint32_t user_reset_handler_address = *((volatile uint32_t*) (USER_FLASH_ADDRESS + 4U));
+	// reset handler address is the next location (eg: @ 0x0800 8004)
+	uint32_t user_reset_handler_address = *((volatile uint32_t*) (user_flash + 4U));
 	user_reset_handler = (void*) user_reset_handler_address; // cast to function pointer
 
 	// call of user_reset handler starts execution of user app

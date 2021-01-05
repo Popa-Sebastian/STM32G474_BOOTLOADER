@@ -31,7 +31,8 @@ uint32_t current_data_index = 0;
 uint32_t FLASH_OK = 1;
 
 // Starting flash address for testing (start of memory bank2)
-uint32_t flash_address = ((uint32_t)0x08040000);
+uint32_t start_of_user_flash = (uint32_t)0x08040000u;
+uint32_t flash_address = (uint32_t)0x08040000u;
 
 // Transmit Data:
 
@@ -214,22 +215,23 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 	switch (Identifier)
 		{
 		case HOST_ENTER_BOOTLOADER:
-			HAL_TIM_Base_Stop_IT(&htim16); // stop timer
+			HAL_TIM_Base_Stop_IT(&htim16);                        // Stop timer16
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET); // LED off
-			// In bootloader mode flash is not OK until successful flash write
-			FLASH_OK = 0;
+			bootloader_FlashEraseBank2(); 						  // Erase Bank 2
+			FLASH_OK = 0; // Flash is not OK until successful flash write
 			break;
 
 		case HOST_USER_ADDRESS:
 			// Change flash address
-			flash_address = array_to_uint32(rxdata_pt);
+			start_of_user_flash = array_to_uint32(rxdata_pt);
+			flash_address = start_of_user_flash;
 			break;
 
 		case HOST_JUMP_TO_APP:
 			// Check to see if everything is ok and then jump
 			if (FLASH_OK)
 			{
-				bootloader_JumpToUserApp();
+				bootloader_JumpToUserApp(start_of_user_flash);
 			}
 			break;
 
