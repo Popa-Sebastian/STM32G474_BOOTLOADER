@@ -35,10 +35,9 @@ uint32_t bootloader_FlashEraseBank2(void);
   * @brief	This function erases a number of pages starting from the specified
   * 		page number
   * @param 	Page, starting page to begin erase
-  * @param  Numberpages, how many pages to be erased
   * @retval HAL_FLASH_GetError
   */
-uint32_t bootloader_FlashErasePage(uint32_t Page, uint32_t NumberPages);
+uint32_t bootloader_FlashErasePage(uint32_t Page);
 
 /*********************bootloader_FlashWrite*************************************
  **
