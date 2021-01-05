@@ -64,7 +64,7 @@ MEMORY
 {
   CCMSRAM    (xrw)    : ORIGIN = 0x10000000,   LENGTH = 32K
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 128K
-  ROM    (rx)    : ORIGIN = 0x08008000,   LENGTH = 480K
+  ROM    (rx)    : ORIGIN = 0x08040000,   LENGTH = 256K
 }
 
 /* Sections */
