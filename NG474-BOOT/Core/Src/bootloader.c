@@ -13,7 +13,7 @@
 #include "bootloader.h"
 
 /* Private variables ---------------------------------------------------------*/
-
+FLASH_EraseInitTypeDef EraseInitStruct;
 
 /* Functions declaration- ----------------------------------------------------*/
 /*********************bootloader_JumpToUserApp**********************************
@@ -53,7 +53,6 @@ void bootloader_JumpToUserApp(uint32_t user_flash)
 uint32_t bootloader_FlashEraseBank2(void)
 {	uint32_t Status = HAL_OK;
 	HAL_FLASH_Unlock();
-	FLASH_EraseInitTypeDef EraseInitStruct;
 	uint32_t BankNumber = 2;
 	// uint32_t PageNumber;
 	uint32_t PageError;
@@ -76,27 +75,44 @@ uint32_t bootloader_FlashEraseBank2(void)
   * @brief	This function erases a number of pages starting from the specified
   * 		page number
   * @param 	Page, starting page to begin erase
-  * @param  Numberpages, how many pages to be erased
   * @retval HAL_FLASH_GetError
   */
-uint32_t bootloader_FlashErasePage(uint32_t Page, uint32_t NumberPages)
+uint32_t bootloader_FlashErasePage(uint32_t Page)
 {
 	uint32_t Status = HAL_OK;
-	FLASH_EraseInitTypeDef EraseInitStruct;
+
+	/* Unlock the Flash to enable the flash control register access *************/
+	HAL_FLASH_Unlock();
+
+	/* Clear OPTVERR bit set on virgin samples */
+	__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_OPTVERR);
+
 	uint32_t PageError;
+
+	uint32_t BankNumber;
+	uint32_t NumberPages;
+
+	if (Page < 128) {
+		BankNumber = FLASH_BANK_1;
+		NumberPages = 127 - Page + 1;
+	} else {
+		BankNumber = FLASH_BANK_2;
+		NumberPages = 255 - Page + 1;
+	}
 
 	/* Fill EraseInit structure*/
 	EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
-	EraseInitStruct.Page = 		Page;
-	EraseInitStruct.NbPages = 	NumberPages;
+	EraseInitStruct.Banks     =	BankNumber;
+	EraseInitStruct.Page      =	Page;
+	EraseInitStruct.NbPages   =	NumberPages;
 
 	if (HAL_FLASHEx_Erase(&EraseInitStruct, &PageError) != HAL_OK)
 	{
 		Status = HAL_FLASH_GetError();
 	}
+	HAL_FLASH_Lock();
 	return Status;
 }
-
 /*********************bootloader_FlashWrite*************************************
  **
   * @brief	This function writes 2KB of data starting from a given address
