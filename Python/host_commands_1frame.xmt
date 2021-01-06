@@ -1,0 +1,43 @@
+; C:\Users\Sebastian\STM32CubeIDE\workspace_bootloader\PCAN_Tx\host_commands.xmt
+;   CAN messages saved by PCAN-View v4.3.0.596
+;
+; Columns descriptions:
+; ~~~~~~~~~~~~~~~~~~~~~
+; +Message ID
+; |            +Cycle time in ms (0=manual)
+; |            |  +Data length
+; |            |  |  +Frame type
+; |            |  |  |  +Message data
+; |            |  |  |  |
+100h        20000  8  D 08h 04h 03h 01h 20h 02h 00h 00h ;
+101h        20001  8  D 08h 04h 07h 17h 08h 04h 07h 09h ;
+102h        20002  8  D 08h 04h 07h 23h 08h 04h 07h 1dh ;
+103h        20003  8  D 00h 00h 00h 00h 08h 04h 07h 29h ;
+104h        20004  8  D 00h 00h 00h 00h 00h 00h 00h 00h ;
+105h        20005  8  D 08h 04h 07h 2fh 00h 00h 00h 00h ;
+106h        20006  8  D 00h 00h 00h 00h 08h 04h 07h 3dh ;
+107h        20007  8  D 08h 04h 07h 59h 08h 04h 07h 4bh ;
+108h        20008  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+109h        20009  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+10ah        20010  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+10bh        20011  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+10ch        20012  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+10dh        20013  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+10eh        20014  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+10fh        20015  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+110h        20016  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+111h        20017  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+112h        20018  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+113h        20019  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+114h        20020  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+115h        20021  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+116h        20022  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+117h        20023  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+118h        20024  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+119h        20025  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+11ah        20026  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+11bh        20027  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+11ch        20028  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+11dh        20029  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+11eh        20030  8  D 08h 04h 03h 51h 08h 04h 03h 51h ;
+11fh        20031  8  D 08h 04h 03h 51h 08h 04h 03h 51h ; end of frame 0
