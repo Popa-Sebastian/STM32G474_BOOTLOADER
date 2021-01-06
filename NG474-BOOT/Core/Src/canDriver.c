@@ -216,8 +216,8 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		{
 		case HOST_ENTER_BOOTLOADER:
 			HAL_TIM_Base_Stop_IT(&htim16);                        // Stop timer16
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET); // LED off
 			bootloader_FlashEraseBank2(); 						  // Erase Bank 2
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);   // LED steady ON
 			FLASH_OK = 0; // Flash is not OK until successful flash write
 			break;
 
