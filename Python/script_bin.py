@@ -7,7 +7,9 @@ writer = open("host_commands.xmt", "a")
 Payload    = [0] * 8 #init Payload list of size 8
 Identifier = 0x100
 index      = 0
-Cycle      = 20000
+Cycle_init = 10000 #ms
+Cycle      = Cycle_init
+delay      = 10 #ms
 can_msg    = []      #init can_msg list
 frames_so_far = 0    #how many frames have been sent so far
 frame_number  = 0
@@ -30,6 +32,8 @@ while True:
         #bytes are reversed in memory
         Payload_str =  Payload[7] + Payload[6] + Payload[5] + Payload[4]
         Payload_str += Payload[3] + Payload[2] + Payload[1] + Payload[0]
+        #increase cycle time
+        Cycle = Cycle + delay
 
         #create can message (Identifier + Cyle time + DLC + Data payload)
         # +Message ID
@@ -40,11 +44,11 @@ while True:
         # |            |  |  |  |
         # 100h       1000 8  D 08h 04h 03h 01h 20h 02h 00h 00h Paused ;
         if frames_so_far < 31:
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle + index) + " "*2 + "8  D " + Payload_str + ";" + "\r\n"]
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + "\r\n"]
             frames_so_far += 1
         else:
             #add the "end of frame" commentary
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle + index) + " "*2 + "8  D " + Payload_str + ";" + " end of frame " + str(frame_number) + "\r\n"]
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + " end of frame " + str(frame_number) + "\r\n"]
             frames_so_far += 1
 
         #set/reset
@@ -55,7 +59,7 @@ while True:
         frames_so_far = 0 #reset counter
         frame_number += 1
         Identifier    = 0x100
-        Cycle        += 1000
+        Cycle         = Cycle_init + (frame_number * 1000)
         index         = 0
 
     # end of reading from file
@@ -75,25 +79,32 @@ if frames_so_far > 0:   #complete the frame with empty bytes (0xFF)
         #bytes are reversed in memory
         Payload_str =  Payload[7] + Payload[6] + Payload[5] + Payload[4]
         Payload_str += Payload[3] + Payload[2] + Payload[1] + Payload[0]
+        #increase cycle time
+        Cycle = Cycle + delay
+
         #create can message (Identifier + Cyle time + DLC + Data payload)
         if frames_so_far < 31:
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle + index) + " "*2 + "8  D " + Payload_str + ";" + "\r\n"]
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + "\r\n"]
             frames_so_far += 1
             index += 1
         else:
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle + index) + " "*2 + "8  D " + Payload_str + ";" + " end of frame " + str(frame_number) + "\r\n"]
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + " end of frame " + str(frame_number) + "\r\n"]
             frames_so_far += 1
 
     while True: #complete the frame with 32 lines
         if frames_so_far < 31:
             #create empty lines: (ffh ffh ffh ffh ffh ffh ffh ffh)
             Payload_str = "ffh " * 8
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle + index) + " "*2 + "8  D " + Payload_str + ";" + "\r\n"]
+            #increase cycle time
+            Cycle = Cycle + delay
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + "\r\n"]
             frames_so_far += 1
             index += 1
         else:
             Payload_str = "ffh " * 8
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle + index) + " "*2 + "8  D " + Payload_str + ";" + " end of frame " + str(frame_number) + "\r\n"]
+            #increase cycle time
+            Cycle = Cycle + delay
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + " end of frame " + str(frame_number) + "\r\n"]
             break
 
 #print data in console (for verification)
@@ -101,7 +112,7 @@ for msg in can_msg:
     print(msg)
 
 #write to file
-writer.writelines(can_msg)
+#writer.writelines(can_msg)
 
 #close files
 writer.close()
