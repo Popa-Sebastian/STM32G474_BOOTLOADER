@@ -6,6 +6,7 @@ mode = input("Enter mode: Paused or Auto: ")
 reader = open("GPIO_InfiniteLedToggling.bin", "rb", buffering=0)
 
 if mode == 'Paused':
+    #open PCAN transmit file for writing
     writer = open("host_commands_paused.xmt", "a")
     mode = " Paused "
     Cycle_init = 1000 #ms
@@ -31,14 +32,17 @@ can_msg    = []      #init can_msg list
 frames_so_far = 0    #how many frames have been sent so far
 frame_number  = 0
 
-bytes_so_far = 0
+crc = [0] #cyclic check
+
+bytes_so_far = 0x0
 
 while True:
-    byte = reader.read(1) #reads 1 byte from file
+    byte = reader.read(1) #reads 1 byte from fileP
     if not byte:
         #eof
         break
     byte = binascii.hexlify(byte) #get data in hex format and convert to ascii
+    crc[frame_number] += (int(str(byte, 'ascii'), 16))
     Payload[bytes_so_far] = str(byte, 'ascii') +"h " #eg: 08h, 04h etc
     bytes_so_far += 1
 
@@ -51,7 +55,7 @@ while True:
         Payload_str += Payload[3] + Payload[2] + Payload[1] + Payload[0]
         #increase cycle time
         Cycle = Cycle + delay
-
+        #Calculate crc (sum)
         #create can message (Identifier + Cyle time + DLC + Data payload)
         # +Message ID
         # |            +Cycle time in ms (0=manual)
@@ -66,6 +70,14 @@ while True:
         else:
             #add the "end of frame" commentary
             can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + mode + ";" + " end of frame " + str(frame_number) + "\r\n"]
+            # +Message ID
+            # |            +Cycle time in ms (0=manual)
+            # |            |  +Data length
+            # |            |  |  +Frame type
+            # |            |  |  |  +Message data
+            # |            |  |  |  |
+            #300h        10321  3  D 0h 14h 76h  Paused;
+            can_msg += ['30' + str(frame_number) + "h" + " "*8 + str(Cycle + 1) + " "*2 + "2  D " + hex(crc[frame_number])[2:4] + "h " + hex(crc[frame_number])[4:] + "h " + ' Paused' + ";" + "\r\n"]
             frames_so_far += 1
 
         #set/reset
@@ -73,6 +85,8 @@ while True:
         Payload = [0]*8
 
     if frames_so_far == 32: #one full 256 data payload
+        print("CRC", frame_number, "=", hex(crc[frame_number]))
+        crc.append(0)
         frames_so_far = 0 #reset counter
         frame_number += 1
         Identifier    = 0x100
@@ -91,6 +105,8 @@ if frames_so_far > 0:   #complete the frame with empty bytes (0xFF)
         Payload[5] = 'ffh '
         Payload[6] = 'ffh '
         Payload[7] = 'ffh '
+        #calculate CRC
+        crc[frame_number] += 0xff * 4
         #create data payload string
         Payload_str = ""
         #bytes are reversed in memory
@@ -112,6 +128,8 @@ if frames_so_far > 0:   #complete the frame with empty bytes (0xFF)
         if frames_so_far < 31:
             #create empty lines: (ffh ffh ffh ffh ffh ffh ffh ffh)
             Payload_str = "ffh " * 8
+            #calculate CRC
+            crc[frame_number] += 0xff * 8
             #increase cycle time
             Cycle = Cycle + delay
             can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str +  mode + ";" + "\r\n"]
@@ -119,9 +137,13 @@ if frames_so_far > 0:   #complete the frame with empty bytes (0xFF)
             index += 1
         else:
             Payload_str = "ffh " * 8
+            #calculate CRC
+            crc[frame_number] += 0xff * 8
+            print("CRC", frame_number, "=", hex(crc[frame_number]))
             #increase cycle time
             Cycle = Cycle + delay
             can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str +  mode + ";" + " end of frame " + str(frame_number) + "\r\n"]
+            can_msg += ['30' + str(frame_number) + "h" + " "*8 + str(Cycle + 1) + " "*2 + "2  D " + hex(crc[frame_number])[2:4] + "h " + hex(crc[frame_number])[4:] + "h " + ' Paused' + ";" + "\r\n"]
             break
 
 #print data in console (for verification)
