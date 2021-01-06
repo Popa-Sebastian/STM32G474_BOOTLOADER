@@ -1,15 +1,32 @@
 import binascii
+
+mode = input("Enter mode: Paused or Auto: ")
+
 #open binary file for reading
 reader = open("GPIO_InfiniteLedToggling.bin", "rb", buffering=0)
-#open PCAN transmit file for writing
-writer = open("host_commands.xmt", "a")
+
+if mode == 'Paused':
+    writer = open("host_commands_paused.xmt", "a")
+    mode = " Paused "
+    Cycle_init = 1000 #ms
+    delay      = 10 #ms
+else:
+    #open PCAN transmit file for writing
+    writer = open("host_commands.xmt", "a")
+    mode = ''
+    Cycle_init = input("Enter cyle init value (in ms): ")
+    delay = input("Enter delay value (in ms): ")
+    try:
+        Cycle_init = int(Cycle_init)
+        delay = int(delay)
+    except:
+        print("Invlid input, must be integer")
+        quit()
 
 Payload    = [0] * 8 #init Payload list of size 8
 Identifier = 0x100
 index      = 0
-Cycle_init = 10000 #ms
 Cycle      = Cycle_init
-delay      = 10 #ms
 can_msg    = []      #init can_msg list
 frames_so_far = 0    #how many frames have been sent so far
 frame_number  = 0
@@ -44,11 +61,11 @@ while True:
         # |            |  |  |  |
         # 100h       1000 8  D 08h 04h 03h 01h 20h 02h 00h 00h Paused ;
         if frames_so_far < 31:
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + "\r\n"]
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + mode + ";" + "\r\n"]
             frames_so_far += 1
         else:
             #add the "end of frame" commentary
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + " end of frame " + str(frame_number) + "\r\n"]
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + mode + ";" + " end of frame " + str(frame_number) + "\r\n"]
             frames_so_far += 1
 
         #set/reset
@@ -84,11 +101,11 @@ if frames_so_far > 0:   #complete the frame with empty bytes (0xFF)
 
         #create can message (Identifier + Cyle time + DLC + Data payload)
         if frames_so_far < 31:
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + "\r\n"]
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str +  mode + ";" + "\r\n"]
             frames_so_far += 1
             index += 1
         else:
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + " end of frame " + str(frame_number) + "\r\n"]
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str +  mode + ";" + " end of frame " + str(frame_number) + "\r\n"]
             frames_so_far += 1
 
     while True: #complete the frame with 32 lines
@@ -97,14 +114,14 @@ if frames_so_far > 0:   #complete the frame with empty bytes (0xFF)
             Payload_str = "ffh " * 8
             #increase cycle time
             Cycle = Cycle + delay
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + "\r\n"]
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str +  mode + ";" + "\r\n"]
             frames_so_far += 1
             index += 1
         else:
             Payload_str = "ffh " * 8
             #increase cycle time
             Cycle = Cycle + delay
-            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str + ";" + " end of frame " + str(frame_number) + "\r\n"]
+            can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str +  mode + ";" + " end of frame " + str(frame_number) + "\r\n"]
             break
 
 #print data in console (for verification)
