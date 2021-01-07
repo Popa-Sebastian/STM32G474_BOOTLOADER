@@ -294,13 +294,14 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 
 			// Reset/Set counting variables
 			crc = 0;
-			frame_number++;
 
 			// Write page
 			if (bootloader_FlashWrite(flash_address, Received_Data64) == HAL_OK)
 			{
 				// Send ACK - Write page complete
-				can_ack_flash_complete();
+				can_ack_flash_complete(frame_number);
+				// Increment frame number
+				frame_number++;
 				// Set FLASH OK
 				FLASH_OK = 1;
 				// Update new flash address for next 256bytes
