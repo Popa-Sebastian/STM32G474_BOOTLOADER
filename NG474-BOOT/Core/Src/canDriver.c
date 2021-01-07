@@ -229,6 +229,12 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			flash_address = start_of_user_flash;
 			break;
 
+		case HOST_RESET_FRAME:
+			// resets current frame to 0
+			crc = 0;
+			current_data_index = 0;
+			can_ack_frame_reset(frame_number);
+
 		case HOST_JUMP_TO_APP:
 			// Check to see if everything is ok and then jump
 			if (FLASH_OK)
