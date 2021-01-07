@@ -29,6 +29,8 @@ FDCAN_RxHeaderTypeDef   RxHeader;
 uint64_t Received_Data64[32];
 uint32_t current_data_index = 0;
 uint32_t FLASH_OK = 1;
+uint32_t crc = 0;	// represents the sum of all received bytes in a 32 frame
+uint32_t frame_number = 0; // number of complete 32 data frames
 
 // Starting flash address for testing (start of memory bank2)
 uint32_t start_of_user_flash = (uint32_t)0x08040000u;
@@ -269,6 +271,10 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		can_error_wrong_index(expected_index, received_index);
 	} else
 	{
+		// calculate CRC, sum of all received bytes
+		for (int i = 0; i < 8; i++){
+			crc += rxdata_pt[i];
+		}
 		// Convert to uint_64
 		Received_Data64[current_data_index] = array_to_uint64(rxdata_pt);
 
@@ -284,7 +290,11 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			current_data_index = 0;
 
 			// Send ACK - Page complete, 32 values received
-			can_ack_page_complete();
+			can_ack_page_complete(frame_number, crc);
+
+			// Reset/Set counting variables
+			crc = 0;
+			frame_number++;
 
 			// Write page
 			if (bootloader_FlashWrite(flash_address, Received_Data64) == HAL_OK)

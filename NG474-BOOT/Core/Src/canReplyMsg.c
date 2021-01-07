@@ -10,6 +10,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "canReplyMsg.h"
+#include "dataConversion.h"
 
 /* Variables declared elsewhere-----------------------------------------------*/
 extern FDCAN_HandleTypeDef 	 hfdcan1;  // declared in fdcan.c
@@ -22,16 +24,26 @@ extern FDCAN_TxHeaderTypeDef TxHeader; // declared in canDriver.c
  **
   * @brief	Sends ack page complete frame
   * 		ID = 0x300,
-  * 		DATA[1]
-  * 		[1]: 0x00
-  * @param	None
+  * 		DATA[3]
+  * 		[1]: frame_number
+  * 		[2]: first byte of CRC
+  * 		[3]: second byte of CRC
+  * @param	frame_number
   * @retval	None
   */
-void can_ack_page_complete(void)
+void can_ack_page_complete(uint32_t frame_number, uint32_t crc)
 {
-	uint8_t page_complete_ack[1]  = {0x00};
+	uint8_t page_complete_ack[3];
+	uint8_t crc_array[2];
 	TxHeader.Identifier = 0x300;
-	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_3;
+
+	// Convert CRC to byte format
+	uint16_to_array(crc, crc_array);
+
+	page_complete_ack[0] = frame_number;
+	page_complete_ack[1] = crc_array[0];
+	page_complete_ack[2] = crc_array[1];
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, page_complete_ack);
 }
 

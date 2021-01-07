@@ -15,12 +15,14 @@
  **
   * @brief	Sends ack page complete frame
   * 		ID = 0x300,
-  * 		DATA[1]
-  * 		[1]: 0x00
-  * @param	None
+  * 		DATA[3]
+  * 		[1]: frame_number
+  * 		[2]: first byte of CRC
+  * 		[3]: second byte of CRC
+  * @param	frame_number
   * @retval	None
   */
-void can_ack_page_complete(void);
+void can_ack_page_complete(uint32_t frame_number, uint32_t crc);
 
 /*********************can_ack_flash_complete************************************
  **

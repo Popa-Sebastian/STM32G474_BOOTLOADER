@@ -29,6 +29,15 @@ uint64_t array_to_uint64(uint8_t *Array);
   */
 uint64_t array_to_uint32(uint8_t *Array);
 
+/*************************uint16_to_array***************************************
+ **
+  * @brief	Converts an uint16_t to a an array of uint8_t with 2 elements
+  * @param	value to be converted
+  * @param	array where to store the returned array
+  * @retval	none
+  */
+void uint16_to_array(uint32_t value, uint8_t *array);
+
 #endif /* INC_DATACONVERSION_H_ */
 
 /***************************END OF FILE****************************************/
