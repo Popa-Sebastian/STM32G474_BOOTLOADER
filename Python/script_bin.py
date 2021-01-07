@@ -77,7 +77,7 @@ while True:
             # |            |  |  |  +Message data
             # |            |  |  |  |
             #300h        10321  3  D 0h 14h 76h  Paused;
-            can_msg += ['30' + str(frame_number) + "h" + " "*8 + str(Cycle + 1) + " "*2 + "2  D " + hex(crc[frame_number])[2:4] + "h " + hex(crc[frame_number])[4:] + "h " + ' Paused' + ";" + "\r\n"]
+            can_msg += ['30' + str(frame_number) + "h" + " "*8 + str(Cycle + 1) + " "*2 + "3  D " + str(frame_number) + "h " + hex(crc[frame_number])[2:4] + "h " + hex(crc[frame_number])[4:] + "h " + ' Paused' + ";" + "\r\n"]
             frames_so_far += 1
 
         #set/reset
@@ -143,7 +143,7 @@ if frames_so_far > 0:   #complete the frame with empty bytes (0xFF)
             #increase cycle time
             Cycle = Cycle + delay
             can_msg += [hex(Identifier + index)[2:] + "h" + " "*8 + str(Cycle) + " "*2 + "8  D " + Payload_str +  mode + ";" + " end of frame " + str(frame_number) + "\r\n"]
-            can_msg += ['30' + str(frame_number) + "h" + " "*8 + str(Cycle + 1) + " "*2 + "2  D " + hex(crc[frame_number])[2:4] + "h " + hex(crc[frame_number])[4:] + "h " + ' Paused' + ";" + "\r\n"]
+            can_msg += ['30' + str(frame_number) + "h" + " "*8 + str(Cycle + 1) + " "*2 + "3  D " + str(frame_number) + "h " + hex(crc[frame_number])[2:4] + "h " + hex(crc[frame_number])[4:] + "h " + ' Paused' + ";" + "\r\n"]
             break
 
 #print data in console (for verification)
@@ -151,7 +151,7 @@ for msg in can_msg:
     print(msg)
 
 #write to file
-#writer.writelines(can_msg)
+writer.writelines(can_msg)
 
 #close files
 writer.close()
