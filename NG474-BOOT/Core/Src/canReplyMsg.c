@@ -130,7 +130,11 @@ void can_error_flash (void)
   */
 void can_ack_frame_reset(uint32_t frame_number)
 {
-	// implement this function
+	TxHeader.Identifier = 0x20;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
+	uint8_t frame_reset[1];
+	frame_reset[0] = frame_number;
+	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, frame_reset);
 }
 
 /***************************END OF FILE****************************************/
