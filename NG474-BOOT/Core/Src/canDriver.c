@@ -285,8 +285,10 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		// Convert to uint_64
 		Received_Data64[current_data_index] = array_to_uint64(rxdata_pt);
 
+#if USE_CAN_RECEIVE_ACK > 0 // defined in canDriver.h
 		// Send ACK - echo data frames;
 		can_ack_echo_data(current_data_index, rxdata_pt);
+#endif
 
 		// Increment data index
 		current_data_index++;
