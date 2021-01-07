@@ -33,6 +33,7 @@ typedef enum
 {
 	HOST_ENTER_BOOTLOADER = 0x00,
 	HOST_USER_ADDRESS =     0x10,
+	HOST_RESET_FRAME =      0x20,
 	HOST_JUMP_TO_APP =      0x90
 } host_command_type;
 

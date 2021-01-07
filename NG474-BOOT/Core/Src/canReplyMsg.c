@@ -120,4 +120,17 @@ void can_error_flash (void)
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, error_flash);
 }
 
+/*************************can_ack_frame_reset***********************************
+ **
+  * @brief	Sends ack that current frame has been reset
+  * 		ID = 0x20
+  * 		DATA[1] = frame_number
+  * @param	frame number
+  * @retval	None
+  */
+void can_ack_frame_reset(uint32_t frame_number)
+{
+	// implement this function
+}
+
 /***************************END OF FILE****************************************/

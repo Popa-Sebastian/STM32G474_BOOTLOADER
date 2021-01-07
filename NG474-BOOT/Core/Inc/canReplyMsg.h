@@ -70,6 +70,16 @@ void can_error_wrong_index(uint8_t expected_index, uint8_t received_index);
   */
 void can_error_flash (void);
 
+/*************************can_ack_frame_reset***********************************
+ **
+  * @brief	Sends ack that current frame has been reset
+  * 		ID = 0x20
+  * 		DATA[1] = frame_number
+  * @param	frame number
+  * @retval	None
+  */
+void can_ack_frame_reset(uint32_t frame_number);
+
 #endif /* INC_CANREPLYMSG_H_ */
 
 /***************************END OF FILE****************************************/
