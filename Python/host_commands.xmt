@@ -1,4 +1,4 @@
-; C:\Users\Sebastian\STM32CubeIDE\workspace_bootloader\PCAN_Tx\host_commands.xmt
+; C:\Users\Sebastian\STM32CubeIDE\workspace_bootloader\PCAN_Tx\bootloader_test_paused.xmt
 ;   CAN messages saved by PCAN-View v4.3.0.596
 ;
 ; Columns descriptions:
@@ -9,7 +9,9 @@
 ; |            |  |  +Frame type
 ; |            |  |  |  +Message data
 ; |            |  |  |  |
-
+000h           0  0  D ; enter bootloader mode
+010h           0  4  D 08h 04h 00h 00h ; change flash address
+090h           0  0  D ; jump to user app
 100h        10010  8  D 08h 04h 03h 01h 20h 02h 00h 00h ;
 101h        10020  8  D 08h 04h 07h 17h 08h 04h 07h 09h ;
 102h        10030  8  D 08h 04h 07h 23h 08h 04h 07h 1dh ;

@@ -2,17 +2,30 @@ import binascii
 
 mode = input("Enter mode: Paused or Auto: ")
 
+#open template file for reading
+reader = open("pcan_template.xmt", "r")
+template = reader.read()
+
+
 #open binary file for reading
 reader = open("GPIO_InfiniteLedToggling.bin", "rb", buffering=0)
 
 if mode == 'Paused':
-    #open PCAN transmit file for writing
+    #open transmit file and copy template, crate file if it doesn't exist
+    writer = open("host_commands_paused.xmt", "w+")
+    writer.write(template)
+    writer.close()
+    #reopen PCAN transmit file for appending
     writer = open("host_commands_paused.xmt", "a")
     mode = " Paused "
     Cycle_init = 1000 #ms
     delay      = 10 #ms
 else:
-    #open PCAN transmit file for writing
+    #open transmit file and copy template, crate file if it doesn't exist
+    writer = open("host_commands.xmt", "w+")
+    writer.write(template)
+    writer.close()
+    #reopen PCAN transmit file for appending
     writer = open("host_commands.xmt", "a")
     mode = ''
     Cycle_init = input("Enter cyle init value (in ms): ")
