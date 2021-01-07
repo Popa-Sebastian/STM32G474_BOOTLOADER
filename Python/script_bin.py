@@ -159,6 +159,10 @@ if frames_so_far > 0:   #complete the frame with empty bytes (0xFF)
             can_msg += ['30' + str(frame_number) + "h" + " "*8 + str(Cycle + 1) + " "*2 + "3  D " + str(frame_number) + "h " + hex(crc[frame_number])[2:4] + "h " + hex(crc[frame_number])[4:] + "h " + ' Paused' + ";" + "\r\n"]
             break
 
+#jump to user app command
+#090h           0  0  D ; jump to user app
+can_msg += ["090h        "+ str(Cycle + 1000) + "  0  D ; jump to user app" + "\r\n"]
+
 #print data in console (for verification)
 for msg in can_msg:
     print(msg)
