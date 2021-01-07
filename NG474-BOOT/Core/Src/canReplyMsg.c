@@ -53,12 +53,13 @@ void can_ack_page_complete(uint32_t frame_number, uint32_t crc)
   * 		ID = 0x400,
   * 		DATA[1]
   * 		[1]: 0xFF
-  * @param	None
+  * @param	frame number to be sent as ACK
   * @retval	None
   */
-void can_ack_flash_complete(void)
+void can_ack_flash_complete(uint32_t frame_number)
 {
-	uint8_t write_complete_ack[1] = {0xFF};
+	uint8_t write_complete_ack[1];
+	write_complete_ack[0] = frame_number;
 	TxHeader.Identifier = 0x400;
 	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, write_complete_ack);
