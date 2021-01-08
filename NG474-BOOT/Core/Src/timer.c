@@ -12,6 +12,7 @@
 #include "main.h"
 #include "tim.h"
 #include "bootloader.h"
+#include "uartMsg.h"
 
 /* Variables declared elsewhere-----------------------------------------------*/
 extern TIM_HandleTypeDef htim16; // declared in tim.c
@@ -44,6 +45,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	// toggle LED
 	 HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	 uart_send_msg(".");
 
 	 static uint32_t count = 0;
 	 count++;
