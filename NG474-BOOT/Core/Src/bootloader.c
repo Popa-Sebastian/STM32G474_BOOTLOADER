@@ -11,6 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "bootloader.h"
+#include "uartMsg.h"
 
 /* Private variables ---------------------------------------------------------*/
 FLASH_EraseInitTypeDef EraseInitStruct;
@@ -27,6 +28,7 @@ FLASH_EraseInitTypeDef EraseInitStruct;
   */
 void bootloader_JumpToUserApp(uint32_t user_flash)
 {
+	uart_send_msg("\r\nJumping to user app\r\n");
 
 	// define a function pointer to user reset handler
 	void (*user_reset_handler)(void);
