@@ -139,7 +139,7 @@ int main(void)
    * 4) Send Hello! message over CAN to HOST application
    */
   can_init();
-  uart_send_msg("Can init OK\r\n");
+  uart_send_msg("\r\nCan init OK\r\n");
 	
   /*
    * Start Timer16:
@@ -147,8 +147,8 @@ int main(void)
    * If command is not received, bootloader jumps to user application stored in
    * memory
    */
+  uart_send_msg("Starting timer:\r\n");
   start_timer();
-  uart_send_msg("Timer started\r\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */

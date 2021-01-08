@@ -228,7 +228,7 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		{
 		case HOST_ENTER_BOOTLOADER:
 			HAL_TIM_Base_Stop_IT(&htim16);                        // Stop timer16
-			uart_send_msg("Bootloader mode\r\n");
+			uart_send_msg("\r\nBootloader mode\r\n");
 			bootloader_FlashEraseBank2(); 						  // Erase Bank 2
 			uart_send_msg("Flash erase OK\r\n");
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);   // LED steady ON
