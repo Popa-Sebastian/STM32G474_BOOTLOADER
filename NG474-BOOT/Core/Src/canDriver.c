@@ -296,14 +296,18 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		uint8_t received_index = (uint8_t)(Identifier - 0x100);
 		can_error_wrong_index(expected_index, received_index);
 		//
+#if USE_UART > 0
 		sprintf(uart_buffer, "Wrong index!\r\n"
 				"expected ID:0x%x received ID:0x%x\r\n",
 				(unsigned int) expected_index+0x100, (unsigned int) received_index+0x100);
 		uart_send_msg(uart_buffer);
+#endif
 	} else
 	{
+#if USE_UART > 0
 		sprintf(uart_buffer, "Data msg received ID:0x%x\r\n",(unsigned int) Identifier);
 		uart_send_msg(uart_buffer);
+#endif
 		// calculate CRC, sum of all received bytes
 		for (int i = 0; i < 8; i++){
 			crc += rxdata_pt[i];
@@ -326,7 +330,9 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 
 			// Send ACK - Page complete, 32 values received
 			can_ack_page_complete(frame_number, crc);
+#if USE_UART > 0
 			uart_send_msg("32 values received, 0x300 sent\r\n");
+#endif
 			// Reset/Set counting variables
 			crc = 0;
 
@@ -339,7 +345,9 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 				frame_number++;
 				// Set FLASH OK
 				FLASH_OK = 1;
+#if USE_UART > 0
 				uart_send_msg("32 values write successful, 0x400 sent\r\n");
+#endif
 				// Update new flash address for next 256bytes
 				flash_address = flash_address + (32u * sizeof(uint64_t));
 			} else
