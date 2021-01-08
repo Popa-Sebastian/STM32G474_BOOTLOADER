@@ -18,6 +18,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <stdio.h>
 #include "main.h"
 #include "fdcan.h"
 #include "tim.h"
@@ -30,6 +31,7 @@
 #include "bootloader.h"
 #include "canDriver.h"
 #include "timer.h"
+#include "uartMsg.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -39,7 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define TEST_MAIN	0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -61,7 +63,8 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int main1 (void)
+#if	TEST_MAIN == 1
+int main(void)
 {
 	// Init peripherals
 	HAL_Init();
@@ -73,21 +76,29 @@ int main1 (void)
 
 	HAL_StatusTypeDef Status;
 	char *user_data = "Hello!\r\n";
+	char uart_buffer[50];
+
 	Status = HAL_UART_Transmit(&huart1, (uint8_t*)user_data, strlen(user_data), HAL_MAX_DELAY);
 
+	uart_send_msg("Can init OK\r\n");
+
+	uint32_t Identifier = 0x300;
+	sprintf(uart_buffer, "Data msg received ID:0x%x\r\n",(unsigned int) Identifier);
+	uart_send_msg(uart_buffer);
 	while(1)
 	{
-		Status = HAL_UART_Transmit(&huart1, (uint8_t*)user_data, strlen(user_data), HAL_MAX_DELAY);
-		HAL_Delay(1000);
+
 	}
 
 }
+#endif
 /* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
+#if TEST_MAIN == 0
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -117,7 +128,9 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   can_init();
+  uart_send_msg("Can init OK\r\n");
   start_timer();
+  uart_send_msg("Timer started\r\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -130,6 +143,7 @@ int main(void)
   }
   /* USER CODE END 3 */
 }
+#endif
 
 /**
   * @brief System Clock Configuration
