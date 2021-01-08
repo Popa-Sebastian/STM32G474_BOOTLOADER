@@ -21,10 +21,12 @@
 #include "main.h"
 #include "fdcan.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "string.h"
 #include "bootloader.h"
 #include "canDriver.h"
 #include "timer.h"
@@ -48,7 +50,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern UART_HandleTypeDef huart1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,7 +61,27 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+int main1 (void)
+{
+	// Init peripherals
+	HAL_Init();
+	SystemClock_Config();
+	MX_GPIO_Init();
+	MX_FDCAN1_Init();
+	MX_TIM16_Init();
+	MX_USART1_UART_Init();
 
+	HAL_StatusTypeDef Status;
+	char *user_data = "Hello!\r\n";
+	Status = HAL_UART_Transmit(&huart1, (uint8_t*)user_data, strlen(user_data), HAL_MAX_DELAY);
+
+	while(1)
+	{
+		Status = HAL_UART_Transmit(&huart1, (uint8_t*)user_data, strlen(user_data), HAL_MAX_DELAY);
+		HAL_Delay(1000);
+	}
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -92,6 +114,7 @@ int main(void)
   MX_GPIO_Init();
   MX_FDCAN1_Init();
   MX_TIM16_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   can_init();
   start_timer();
@@ -153,7 +176,8 @@ void SystemClock_Config(void)
   }
   /** Initializes the peripherals clocks
   */
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_FDCAN;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_FDCAN;
+  PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
   PeriphClkInit.FdcanClockSelection = RCC_FDCANCLKSOURCE_PCLK1;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
