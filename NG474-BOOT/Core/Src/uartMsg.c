@@ -14,7 +14,7 @@
 #include "uartMsg.h"
 
 /* Variables declared elsewhere-----------------------------------------------*/
-extern UART_HandleTypeDef huart1; //
+extern UART_HandleTypeDef huart1; // defined in usart.c
 
 /* Private function prototypes -----------------------------------------------*/
 /**************************uart_send_msg****************************************
@@ -25,10 +25,16 @@ extern UART_HandleTypeDef huart1; //
   */
 HAL_StatusTypeDef uart_send_msg(char *user_data)
 {
+#ifndef USE_UART
+	// do nothing
+	return HAL_OK;
+#else
 	HAL_StatusTypeDef Status;
-	Status = HAL_UART_Transmit(&huart1, (uint8_t*)user_data, strlen(user_data), UART_DELAY);
+	Status = HAL_UART_Transmit(&huart1, (uint8_t*)user_data,
+			strlen(user_data), UART_DELAY);
 
 	return Status;
+#endif
 }
 
 /***************************END OF FILE****************************************/

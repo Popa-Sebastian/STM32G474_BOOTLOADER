@@ -21,7 +21,6 @@
 /* Variables declared elsewhere-----------------------------------------------*/
 extern FDCAN_HandleTypeDef hfdcan1; // declared in fdcan.c
 extern TIM_HandleTypeDef htim16; // declared in tim.c
-extern UART_HandleTypeDef huart1; //
 /* Private variables ---------------------------------------------------------*/
 // CAN TypeDefs
 FDCAN_TxHeaderTypeDef   TxHeader;
@@ -33,9 +32,6 @@ uint32_t current_data_index = 0;
 uint32_t FLASH_OK = 1;
 uint32_t crc = 0;	// represents the sum of all received bytes in a 32 frame
 uint32_t frame_number = 0; // number of complete 32 data frames
-
-// UART
-char *uart_send_buff;
 
 // Starting flash address for testing (start of memory bank2)
 uint32_t start_of_user_flash = (uint32_t)0x08040000u;
@@ -182,7 +178,8 @@ void HAL_FDCAN_TxFifoEmptyCallback(FDCAN_HandleTypeDef *hfdcan)
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
 	// Get message
-	/* Enter critical section: Disable interrupts to avoid any interruption during the loop */
+	/* Enter critical section: Disable interrupts to avoid any interruption
+	 * can message handling */
 	uint32_t primask_bit;
 	primask_bit = __get_PRIMASK();
 	__disable_irq();
@@ -298,11 +295,13 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		//
 		sprintf(uart_buffer, "Wrong index!\r\n"
 				"expected ID:0x%x received ID:0x%x\r\n",
-				(unsigned int) expected_index+0x100, (unsigned int) received_index+0x100);
+				(unsigned int) expected_index+0x100,
+				(unsigned int) received_index+0x100);
 		uart_send_msg(uart_buffer);
 	} else
 	{
-		sprintf(uart_buffer, "Data msg received ID:0x%x\r\n",(unsigned int) Identifier);
+		sprintf(uart_buffer, "Data msg received ID:0x%x\r\n",
+				(unsigned int) Identifier);
 		uart_send_msg(uart_buffer);
 		// calculate CRC, sum of all received bytes
 		for (int i = 0; i < 8; i++){
