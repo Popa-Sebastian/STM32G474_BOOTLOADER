@@ -9,17 +9,19 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include<stdio.h>
 #include "main.h"
 #include "canDriver.h"
 #include "bootloader.h"
 #include "canReplyMsg.h"
 #include "dataConversion.h"
 #include "timer.h"
+#include "uartMsg.h"
 
 /* Variables declared elsewhere-----------------------------------------------*/
 extern FDCAN_HandleTypeDef hfdcan1; // declared in fdcan.c
 extern TIM_HandleTypeDef htim16; // declared in tim.c
-
+extern UART_HandleTypeDef huart1; //
 /* Private variables ---------------------------------------------------------*/
 // CAN TypeDefs
 FDCAN_TxHeaderTypeDef   TxHeader;
@@ -31,6 +33,9 @@ uint32_t current_data_index = 0;
 uint32_t FLASH_OK = 1;
 uint32_t crc = 0;	// represents the sum of all received bytes in a 32 frame
 uint32_t frame_number = 0; // number of complete 32 data frames
+
+// UART
+char *uart_send_buff;
 
 // Starting flash address for testing (start of memory bank2)
 uint32_t start_of_user_flash = (uint32_t)0x08040000u;
@@ -218,9 +223,12 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		{
 		case HOST_ENTER_BOOTLOADER:
 			HAL_TIM_Base_Stop_IT(&htim16);                        // Stop timer16
+			uart_send_msg("Bootloader mode\r\n");
 			bootloader_FlashEraseBank2(); 						  // Erase Bank 2
+			uart_send_msg("Flash erase OK\r\n");
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);   // LED steady ON
 			FLASH_OK = 0; // Flash is not OK until successful flash write
+
 			break;
 
 		case HOST_USER_ADDRESS:
@@ -234,6 +242,7 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			crc = 0;
 			current_data_index = 0;
 			can_ack_frame_reset(frame_number);
+			uart_send_msg("Current frame reset\r\n");
 			break;
 
 		case HOST_JUMP_TO_APP:
@@ -267,8 +276,10 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
   */
 void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 {
+	char uart_buffer[50];
 	// FLASH_OK is 0 while receiving data
 	FLASH_OK = 0;
+
 	// Check if this is the right Data - index
 	if (Identifier != (0x100 + current_data_index))
 	{
@@ -276,8 +287,15 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		uint8_t expected_index = (uint8_t)(current_data_index);
 		uint8_t received_index = (uint8_t)(Identifier - 0x100);
 		can_error_wrong_index(expected_index, received_index);
+		//
+		sprintf(uart_buffer, "Wrong index!\r\n"
+				"expected ID:0x%x received ID:0x%x\r\n",
+				(unsigned int) expected_index+0x100, (unsigned int) received_index+0x100);
+		uart_send_msg(uart_buffer);
 	} else
 	{
+		sprintf(uart_buffer, "Data msg received ID:0x%x\r\n",(unsigned int) Identifier);
+		uart_send_msg(uart_buffer);
 		// calculate CRC, sum of all received bytes
 		for (int i = 0; i < 8; i++){
 			crc += rxdata_pt[i];
@@ -300,7 +318,7 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 
 			// Send ACK - Page complete, 32 values received
 			can_ack_page_complete(frame_number, crc);
-
+			uart_send_msg("32 values received, 0x300 sent\r\n");
 			// Reset/Set counting variables
 			crc = 0;
 
@@ -313,6 +331,7 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 				frame_number++;
 				// Set FLASH OK
 				FLASH_OK = 1;
+				uart_send_msg("32 values write successful, 0x400 sent\r\n");
 				// Update new flash address for next 256bytes
 				flash_address = flash_address + (32u * sizeof(uint64_t));
 			} else
