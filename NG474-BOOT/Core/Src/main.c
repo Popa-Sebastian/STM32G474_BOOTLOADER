@@ -129,9 +129,13 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   can_init();
+#if USE_UART > 0
   uart_send_msg("Can init OK\r\n");
+#endif
   start_timer();
+#if USE_UART > 0
   uart_send_msg("Timer started\r\n");
+#endif
   /* USER CODE END 2 */
 
   /* Infinite loop */
