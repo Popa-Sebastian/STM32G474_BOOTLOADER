@@ -182,6 +182,10 @@ void HAL_FDCAN_TxFifoEmptyCallback(FDCAN_HandleTypeDef *hfdcan)
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
 	// Get message
+	/* Enter critical section: Disable interrupts to avoid any interruption during the loop */
+	uint32_t primask_bit;
+	primask_bit = __get_PRIMASK();
+	__disable_irq();
 	HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &RxHeader, RxData);
 
 	// Check what type of message it is (Host, Data)
@@ -189,14 +193,20 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 		{
 		case CAN_HOST:
 			can_host_handler(RxHeader.Identifier, RxData);
+			/* Exit critical section: restore previous priority mask */
+			__set_PRIMASK(primask_bit);
 			break;
 
 		case CAN_DATA:
 			can_data_handler(RxHeader.Identifier, RxData);
+			/* Exit critical section: restore previous priority mask */
+			__set_PRIMASK(primask_bit);
 			break;
 
 		default:
 			// Other modes are not supported
+			/* Exit critical section: restore previous priority mask */
+			__set_PRIMASK(primask_bit);
 			break;
 		}
 }
