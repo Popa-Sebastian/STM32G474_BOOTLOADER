@@ -79,12 +79,14 @@ int main(void)
 	char *user_data = "Hello!\r\n";
 	char uart_buffer[50];
 
-	Status = HAL_UART_Transmit(&huart1, (uint8_t*)user_data, strlen(user_data), HAL_MAX_DELAY);
+	Status = HAL_UART_Transmit(&huart1, (uint8_t*)user_data,
+			strlen(user_data), HAL_MAX_DELAY);
 
 	uart_send_msg("Can init OK\r\n");
 
 	uint32_t Identifier = 0x300;
-	sprintf(uart_buffer, "Data msg received ID:0x%x\r\n",(unsigned int) Identifier);
+	sprintf(uart_buffer, "Data msg received ID:0x%x\r\n",
+			(unsigned int) Identifier);
 	uart_send_msg(uart_buffer);
 	while(1)
 	{
@@ -128,11 +130,27 @@ int main(void)
   MX_TIM16_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  /*
+   * Initialize the CAN:
+   * 1) Initialize receive filters.
+   * 2) Initialize interrupts.
+   * 3) Start CAN listening
+   * 4) Send Hello! message over CAN to HOST application
+   */
   can_init();
+
 #if USE_UART > 0
   uart_send_msg("Can init OK\r\n");
 #endif
+  /*
+   * Start Timer16:
+   * Timer 16 waits for 10 seconds to receive enter bootloader command (0x00)
+   * If command is not received, bootloader jumps to user application stored in
+   * memory
+   */
   start_timer();
+
 #if USE_UART > 0
   uart_send_msg("Timer started\r\n");
 #endif
