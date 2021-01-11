@@ -17,6 +17,7 @@
 /* Variables declared elsewhere-----------------------------------------------*/
 extern TIM_HandleTypeDef htim16; // declared in tim.c
 extern uint32_t start_of_user_flash; // declared in canDriver.c
+extern FDCAN_HandleTypeDef hfdcan1; // declared in fdcan.c
 
 /* Functions declaration- ----------------------------------------------------*/
 /***************************start_timer*****************************************
@@ -51,6 +52,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	 count++;
 	 if (count == 10)
 	 {
+		 HAL_TIM_Base_Stop_IT(&htim16);	// stop CAN
+		 HAL_FDCAN_Stop(&hfdcan1);		// stop timer16
+		 uart_send_msg("\r\nAuto-jump to user app\r\n");
 		 bootloader_JumpToUserApp(start_of_user_flash);
 	 }
 }
