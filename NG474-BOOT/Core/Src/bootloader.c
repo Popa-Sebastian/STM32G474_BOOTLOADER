@@ -46,6 +46,23 @@ void bootloader_JumpToUserApp(uint32_t user_flash)
    SCB->VTOR = 0x8040000;
    //!- jump to application
    uResetHandler.pfnPointer();
+#ifdef BOOTLOADER_1
+	// define a function pointer to user reset handler
+	void (*user_reset_handler)(void);
+
+	// set the MSP
+	// MSP located at start of user flash (eg: @0x0800 8000)
+	uint32_t user_msp_value = *((volatile uint32_t *) user_flash);
+	__set_MSP(user_msp_value);
+
+	// reset handler address is the next location (eg: @ 0x0800 8004)
+	uint32_t user_reset_handler_address = *((volatile uint32_t*) (user_flash + 4U));
+	user_reset_handler = (void*) user_reset_handler_address; // cast to function pointer
+
+	// call of user_reset handler starts execution of user app
+	user_reset_handler();
+
+#endif
 }
 
 /*********************bootloader_FlashEraseBank2********************************
