@@ -20,6 +20,7 @@ if mode == 'Paused':
     mode = " Paused "
     Cycle_init = 1000  # ms
     delay = 10  # ms
+    delay_between_frames = 20 # ms
 else:
     # open transmit file and copy template, crate file if it doesn't exist
     writer = open("host_commands.xmt", "w+")
@@ -79,12 +80,12 @@ while True:
         # 100h       1000 8  D 08h 04h 03h 01h 20h 02h 00h 00h Paused ;
         if frames_so_far < 31:
             can_msg += [hex(Identifier + index)[2:] + "h" + " " * 8 + str(
-                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + "\r\n"]
+                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + "\n"]
             frames_so_far += 1
         else:
             # add the "end of frame" commentary
             can_msg += [hex(Identifier + index)[2:] + "h" + " " * 8 + str(
-                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + " end of frame " + str(frame_number) + "\r\n"]
+                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + " end of frame " + str(frame_number) + "\n"]
             # +Message ID
             # |            +Cycle time in ms (0=manual)
             # |            |  +Data length
@@ -92,9 +93,9 @@ while True:
             # |            |  |  |  +Message data
             # |            |  |  |  |
             # 300h        10321  3  D 0h 14h 76h  Paused;
-            can_msg += ['30' + str(frame_number) + "h" + " " * 8 + str(Cycle + 1) + " " * 2 + "3  D " + str(
+            can_msg += ['300' + "h" + " " * 8 + str(Cycle + 1) + " " * 2 + "3  D " + str(
                 frame_number) + "h " + hex(crc[frame_number])[2:4] + "h " + hex(crc[frame_number])[
-                                                                            4:] + "h " + ' Paused' + ";" + "\r\n"]
+                                                                            4:] + "h " + ' Paused' + ";" + "\n"]
             frames_so_far += 1
 
         # set/reset
@@ -135,12 +136,12 @@ if frames_so_far > 0:  # complete the frame with empty bytes (0xFF)
         # create can message (Identifier + Cyle time + DLC + Data payload)
         if frames_so_far < 31:
             can_msg += [hex(Identifier + index)[2:] + "h" + " " * 8 + str(
-                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + "\r\n"]
+                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + "\n"]
             frames_so_far += 1
             index += 1
         else:
             can_msg += [hex(Identifier + index)[2:] + "h" + " " * 8 + str(
-                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + " end of frame " + str(frame_number) + "\r\n"]
+                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + " end of frame " + str(frame_number) + "\n"]
             frames_so_far += 1
 
     while True:  # complete the frame with 32 lines
@@ -152,7 +153,7 @@ if frames_so_far > 0:  # complete the frame with empty bytes (0xFF)
             # increase cycle time
             Cycle = Cycle + delay
             can_msg += [hex(Identifier + index)[2:] + "h" + " " * 8 + str(
-                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + "\r\n"]
+                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + "\n"]
             frames_so_far += 1
             index += 1
         else:
@@ -163,15 +164,15 @@ if frames_so_far > 0:  # complete the frame with empty bytes (0xFF)
             # increase cycle time
             Cycle = Cycle + delay
             can_msg += [hex(Identifier + index)[2:] + "h" + " " * 8 + str(
-                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + " end of frame " + str(frame_number) + "\r\n"]
-            can_msg += ['30' + str(frame_number) + "h" + " " * 8 + str(Cycle + 1) + " " * 2 + "3  D " + str(
+                Cycle) + " " * 2 + "8  D " + Payload_str + mode + ";" + " end of frame " + str(frame_number) + "\n"]
+            can_msg += ['300' + "h" + " " * 8 + str(Cycle + 1) + " " * 2 + "3  D " + str(
                 frame_number) + "h " + hex(crc[frame_number])[2:4] + "h " + hex(crc[frame_number])[
-                                                                            4:] + "h " + ' Paused' + ";" + "\r\n"]
+                                                                            4:] + "h " + ' Paused' + ";" + "\n"]
             break
 
 # jump to user app command
 # 090h           0  0  D ; jump to user app
-can_msg += ["090h        " + str(Cycle + 1000) + "  0  D ; jump to user app" + "\r\n"]
+can_msg += ["090h        " + str(Cycle + 1000) + "  0  D ; jump to user app" + "\n"]
 
 # print data in console (for verification)
 for msg in can_msg:
