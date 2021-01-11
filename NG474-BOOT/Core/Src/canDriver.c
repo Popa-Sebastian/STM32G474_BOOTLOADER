@@ -29,7 +29,14 @@ FDCAN_RxHeaderTypeDef   RxHeader;
 // User variables
 uint64_t Received_Data64[32];
 uint32_t current_data_index = 0;
-uint32_t FLASH_OK = 1;
+
+/* Flash_OK is initialized to 0
+ * This prevents jump to user app command (0x90) to be performed before any other command.
+ * The bootloader jumps automatically to user app after the timer has expired so
+ * if no new data is written, jump to user app is performed automatically without
+ * checking FLASH_OK.
+ */
+uint32_t FLASH_OK = 0;
 uint32_t crc = 0;	// represents the sum of all received bytes in a 32 frame
 uint32_t frame_number = 0; // number of complete 32 data frames
 
