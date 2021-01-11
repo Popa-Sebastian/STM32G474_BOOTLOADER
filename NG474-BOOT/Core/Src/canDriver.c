@@ -29,7 +29,15 @@ FDCAN_RxHeaderTypeDef   RxHeader;
 // User variables
 uint64_t Received_Data64[32];
 uint32_t current_data_index = 0;
-uint32_t FLASH_OK = 1;
+
+/* Flash_OK is initialized to 0
+ * This prevents jump to user app command (0x90) to be performed before any other command.
+ * The bootloader jumps automatically to user app after the timer has expired so
+ * if no new data is written, jump to user app is performed automatically without
+ * checking FLASH_OK.
+ */
+uint32_t FLASH_OK = 0;
+
 uint32_t crc = 0;	// represents the sum of all received bytes in a 32 frame
 uint32_t frame_number = 0; // number of complete 32 data frames
 
@@ -202,6 +210,8 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 
 		default:
 			// Other modes are not supported
+			/* Exit critical section: restore previous priority mask */
+			__set_PRIMASK(primask_bit);
 			break;
 		}
 }
@@ -228,7 +238,7 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		{
 		case HOST_ENTER_BOOTLOADER:
 			HAL_TIM_Base_Stop_IT(&htim16);                        // Stop timer16
-			uart_send_msg("Bootloader mode\r\n");
+			uart_send_msg("\r\nBootloader mode\r\n");
 			bootloader_FlashEraseBank2(); 						  // Erase Bank 2
 			uart_send_msg("Flash erase OK\r\n");
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);   // LED steady ON
@@ -252,9 +262,14 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 
 		case HOST_JUMP_TO_APP:
 			// Check to see if everything is ok and then jump
+			HAL_FDCAN_Stop(&hfdcan1);		// stop CAN
 			if (FLASH_OK)
 			{
+				uart_send_msg("0x90: Jump to user app\r\n");
 				bootloader_JumpToUserApp(start_of_user_flash);
+			}
+			else {
+				uart_send_msg("0x90: Cannot jump, FLASH NOT OK\r\n");
 			}
 			break;
 

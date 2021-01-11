@@ -11,6 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "bootloader.h"
+#include "uartMsg.h"
 
 /* Private variables ---------------------------------------------------------*/
 FLASH_EraseInitTypeDef EraseInitStruct;
@@ -27,7 +28,25 @@ FLASH_EraseInitTypeDef EraseInitStruct;
   */
 void bootloader_JumpToUserApp(uint32_t user_flash)
 {
+   typedef void (*pFunction)(void);
+   union
+   {
+      uint32_t ulValue;
+      pFunction pfnPointer;
+   } uResetHandler;
 
+   //----------------------------------------------------------------
+   // Jump to user application
+   //
+   //!- calculate jump address: reset handler of new application
+   uResetHandler.ulValue = *(uint32_t volatile *) (user_flash + 4);
+
+   //!- Initialize user application's Stack Pointer
+   __set_MSP(user_flash);
+   SCB->VTOR = 0x8040000;
+   //!- jump to application
+   uResetHandler.pfnPointer();
+#ifdef BOOTLOADER_1
 	// define a function pointer to user reset handler
 	void (*user_reset_handler)(void);
 
@@ -42,6 +61,8 @@ void bootloader_JumpToUserApp(uint32_t user_flash)
 
 	// call of user_reset handler starts execution of user app
 	user_reset_handler();
+
+#endif
 }
 
 /*********************bootloader_FlashEraseBank2********************************
