@@ -1,5 +1,6 @@
 import binascii
 
+file = input("Enter filename(.bin): ")
 mode = input("Enter mode: Paused or Auto: ")
 
 # open template file for reading
@@ -7,7 +8,7 @@ reader = open("pcan_template.xmt", "r")
 template = reader.read()
 
 # open binary file for reading
-reader = open("GPIO_InfiniteLedToggling.bin", "rb", buffering=0)
+reader = open(file, "rb", buffering=0)
 
 if mode == 'Paused':
     # open transmit file and copy template, crate file if it doesn't exist
@@ -35,7 +36,7 @@ else:
     except:
         print("Invlid input, must be integer")
         quit()
-
+    delay_between_frames = 20 #ms
 Payload = [0] * 8  # init Payload list of size 8
 Identifier = 0x100
 index = 0
@@ -106,7 +107,7 @@ while True:
         frames_so_far = 0  # reset counter
         frame_number += 1
         Identifier = 0x100
-        Cycle = Cycle_init + (frame_number * 1000)
+        Cycle = Cycle + delay_between_frames
         index = 0
 
     # end of reading from file
