@@ -262,9 +262,9 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 
 		case HOST_JUMP_TO_APP:
 			// Check to see if everything is ok and then jump
-			HAL_FDCAN_Stop(&hfdcan1);		// stop CAN
 			if (FLASH_OK)
 			{
+				HAL_FDCAN_Stop(&hfdcan1);		// stop CAN
 				uart_send_msg("0x90: Jump to user app\r\n");
 				bootloader_JumpToUserApp(start_of_user_flash);
 			}
