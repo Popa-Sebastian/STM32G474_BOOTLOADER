@@ -49,7 +49,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 	 static uint32_t count = 0;
 	 count++;
-	 if (count == 20)
+	 if (count == 10)
 	 {
 		 bootloader_JumpToUserApp(start_of_user_flash);
 	 }

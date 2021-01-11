@@ -75,19 +75,7 @@ int main(void)
 	MX_TIM16_Init();
 	MX_USART1_UART_Init();
 
-	HAL_StatusTypeDef Status;
-	char *user_data = "Hello!\r\n";
-	char uart_buffer[50];
-
-	Status = HAL_UART_Transmit(&huart1, (uint8_t*)user_data,
-			strlen(user_data), HAL_MAX_DELAY);
-
-	uart_send_msg("Can init OK\r\n");
-
-	uint32_t Identifier = 0x300;
-	sprintf(uart_buffer, "Data msg received ID:0x%x\r\n",
-			(unsigned int) Identifier);
-	uart_send_msg(uart_buffer);
+	bootloader_JumpToUserApp(0x08040000);
 	while(1)
 	{
 
