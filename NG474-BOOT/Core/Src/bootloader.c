@@ -28,21 +28,24 @@ FLASH_EraseInitTypeDef EraseInitStruct;
   */
 void bootloader_JumpToUserApp(uint32_t user_flash)
 {
-	uart_send_msg("\r\nJumping to user app\r\n");
-	// define a function pointer to user reset handler
-	void (*user_reset_handler)(void);
+   typedef void (*pFunction)(void);
+   union
+   {
+      uint32_t ulValue;
+      pFunction pfnPointer;
+   } uResetHandler;
 
-	// set the MSP
-	// MSP located at start of user flash (eg: @0x0800 8000)
-	uint32_t user_msp_value = *((volatile uint32_t *) user_flash);
-	__set_MSP(user_msp_value);
+   //----------------------------------------------------------------
+   // Jump to user application
+   //
+   //!- calculate jump address: reset handler of new application
+   uResetHandler.ulValue = *(uint32_t volatile *) (user_flash + 4);
 
-	// reset handler address is the next location (eg: @ 0x0800 8004)
-	uint32_t user_reset_handler_address = *((volatile uint32_t*) (user_flash + 4U));
-	user_reset_handler = (void*) user_reset_handler_address; // cast to function pointer
-
-	// call of user_reset handler starts execution of user app
-	user_reset_handler();
+   //!- Initialize user application's Stack Pointer
+   __set_MSP(user_flash);
+   SCB->VTOR = 0x8040000;
+   //!- jump to application
+   uResetHandler.pfnPointer();
 }
 
 /*********************bootloader_FlashEraseBank2********************************
