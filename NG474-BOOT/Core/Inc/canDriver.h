@@ -14,7 +14,7 @@
 /* Private define ------------------------------------------------------------*/
 #define USE_TX_INTERRUPT        0
 #define FLASH_TEST_DATA         0
-#define USE_CAN_RECEIVE_ACK		1
+#define USE_CAN_RECEIVE_ACK		0
 #define FLASH_USER_START_ADDR   ADDR_FLASH_PAGE_128   /* FOR TESTING WE USE BANK2*/
 
 /* Private enums ------------------------------------------------------------*/
