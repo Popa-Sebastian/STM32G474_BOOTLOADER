@@ -37,6 +37,7 @@ uint32_t current_data_index = 0;
  * checking FLASH_OK.
  */
 uint32_t FLASH_OK = 0;
+
 uint32_t crc = 0;	// represents the sum of all received bytes in a 32 frame
 uint32_t frame_number = 0; // number of complete 32 data frames
 
