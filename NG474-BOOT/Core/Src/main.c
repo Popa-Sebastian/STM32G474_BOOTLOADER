@@ -126,7 +126,8 @@ int main(void)
    * 3) Start CAN listening
    * 4) Send Hello! message over CAN to HOST application
    */
-  can_init();
+  can_init(&hfdcan1);
+  uart_send_msg("\r\nCan init OK\r\n");
 
   uart_send_msg("\r\nCan init OK\r\n");
   /*
