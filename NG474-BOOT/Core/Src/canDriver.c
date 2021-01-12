@@ -73,13 +73,13 @@ uint8_t RxData[8];
   * 		3) Activates Interrupts
   * 		4) Starts CAN controller
   * 		5) Sends a Hello message (CAN Init OK)
-  * @param	None
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @retval	None
   */
-void can_init(void)
+void can_init(FDCAN_HandleTypeDef *hfdcan)
 {
 	// Step1: Configure the FDCAN filters
-	can_filter_init();
+	can_filter_init(hfdcan);
 
 	// Step2: Configure global TxHeader attributes
 	TxHeader.IdType =           FDCAN_STANDARD_ID;
@@ -91,7 +91,7 @@ void can_init(void)
 	TxHeader.MessageMarker =    0x00;
 
 	// Step3: Activate Interrupt Notifications
-	if (HAL_FDCAN_ActivateNotification(&hfdcan1,
+	if (HAL_FDCAN_ActivateNotification(hfdcan,
 		  (FDCAN_IT_RX_FIFO0_NEW_MESSAGE), 0) != HAL_OK)
 	{
 		Error_Handler();
@@ -106,7 +106,7 @@ void can_init(void)
 #endif
 
 	// Step4: Start FDCAN controller (continuous listening CAN bus)
-	if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK)
+	if (HAL_FDCAN_Start(hfdcan) != HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -115,7 +115,7 @@ void can_init(void)
 	TxHeader.Identifier = 0x00;
 	TxHeader.DataLength = FDCAN_DLC_BYTES_8;
 	uint8_t TxHello[8]  = {0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x21, 0x21};
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxHello);
+	HAL_FDCAN_AddMessageToTxFifoQ(hfdcan, &TxHeader, TxHello);
 }
 
 /************************can_filter_init****************************************
@@ -123,10 +123,10 @@ void can_init(void)
   * @brief	Initializes CAN filters:
   * 		1) Index 0, range 000 - 0FF, Host instructions
   * 		2) Index 1, range 100 - 1FF, Data frames
-  * @param	None
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @retval	None
   */
-void can_filter_init(void)
+void can_filter_init(FDCAN_HandleTypeDef *hfdcan)
 {
 	FDCAN_FilterTypeDef     sFilterConfig;
 
@@ -139,7 +139,7 @@ void can_filter_init(void)
 	sFilterConfig.FilterType =  FDCAN_FILTER_RANGE;
 	sFilterConfig.FilterID1 =   0x000;
 	sFilterConfig.FilterID2 =   0x0FF;
-	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK)
+	if (HAL_FDCAN_ConfigFilter(hfdcan, &sFilterConfig) != HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -149,7 +149,7 @@ void can_filter_init(void)
 	sFilterConfig.FilterType =  FDCAN_FILTER_RANGE;
 	sFilterConfig.FilterID1 =   0x100;
 	sFilterConfig.FilterID2 =   0x1FF;
-	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK)
+	if (HAL_FDCAN_ConfigFilter(hfdcan, &sFilterConfig) != HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -159,7 +159,7 @@ void can_filter_init(void)
 void HAL_FDCAN_TxFifoEmptyCallback(FDCAN_HandleTypeDef *hfdcan)
 {
 	TxHeader.Identifier = 0x200;
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData);
+	HAL_FDCAN_AddMessageToTxFifoQ(&fdcan, &TxHeader, TxData);
 }
 #endif
 
@@ -191,19 +191,19 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 	uint32_t primask_bit;
 	primask_bit = __get_PRIMASK();
 	__disable_irq();
-	HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &RxHeader, RxData);
+	HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, RxData);
 
 	// Check what type of message it is (Host, Data)
 	switch (RxHeader.FilterIndex)
 		{
 		case CAN_HOST:
-			can_host_handler(RxHeader.Identifier, RxData);
+			can_host_handler(hfdcan, RxHeader.Identifier, RxData);
 			/* Exit critical section: restore previous priority mask */
 			__set_PRIMASK(primask_bit);
 			break;
 
 		case CAN_DATA:
-			can_data_handler(RxHeader.Identifier, RxData);
+			can_data_handler(hfdcan, RxHeader.Identifier, RxData);
 			/* Exit critical section: restore previous priority mask */
 			__set_PRIMASK(primask_bit);
 			break;
@@ -227,11 +227,12 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
   *			address, where the user app will be stored.
   *			3) HOST_JUMP_TO_APP: after a successful bootloader and flash of the
   *			of the user app, this command makes the jump to user app.
+  *	@param  FDCAN_HandleTypeDef *hfdcan
   * @param	Identifier corresponds to the command issued by HOST
   * @param  rxdata_pt, pointer to data
   * @retval	None
   */
-void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
+void can_host_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t *rxdata_pt)
 {
 	// Check what command it is
 	switch (Identifier)
@@ -256,7 +257,7 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			// resets current frame to 0
 			crc = 0;
 			current_data_index = 0;
-			can_ack_frame_reset(frame_number);
+			can_ack_frame_reset(hfdcan, frame_number);
 			uart_send_msg("Current frame reset\r\n");
 			break;
 
@@ -264,7 +265,7 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			// Check to see if everything is ok and then jump
 			if (FLASH_OK)
 			{
-				HAL_FDCAN_Stop(&hfdcan1);		// stop CAN
+				HAL_FDCAN_Stop(hfdcan);		// stop CAN
 				uart_send_msg("0x90: Jump to user app\r\n");
 				bootloader_JumpToUserApp(start_of_user_flash);
 			}
@@ -290,11 +291,12 @@ void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt)
   * 		4) After 32 data messages have been received, data is stored in flash
   * 		memory at the specified user location. Start and end of flash write
   * 		are confirmed by CAN transmissions.
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	Identifier of the received message (corresponds to Data index)
   * @param  rxdata_pt - pointer to received data to be stored
   * @retval	None
   */
-void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
+void can_data_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t *rxdata_pt)
 {
 	char uart_buffer[50];
 	// FLASH_OK is 0 while receiving data
@@ -306,7 +308,7 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 		// Error, data frames not in order
 		uint8_t expected_index = (uint8_t)(current_data_index);
 		uint8_t received_index = (uint8_t)(Identifier - 0x100);
-		can_error_wrong_index(expected_index, received_index);
+		can_error_wrong_index(hfdcan, expected_index, received_index);
 		//
 		sprintf(uart_buffer, "Wrong index!\r\n"
 				"expected ID:0x%x received ID:0x%x\r\n",
@@ -327,7 +329,7 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 
 #if USE_CAN_RECEIVE_ACK > 0 // defined in canDriver.h
 		// Send ACK - echo data frames;
-		can_ack_echo_data(current_data_index, rxdata_pt);
+		can_ack_echo_data(hfdcan, current_data_index, rxdata_pt);
 #endif
 
 		// Increment data index
@@ -339,7 +341,7 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			current_data_index = 0;
 
 			// Send ACK - Page complete, 32 values received
-			can_ack_page_complete(frame_number, crc);
+			can_ack_page_complete(hfdcan, frame_number, crc);
 			uart_send_msg("32 values received, 0x300 sent\r\n");
 			// Reset/Set counting variables
 			crc = 0;
@@ -348,7 +350,7 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			if (bootloader_FlashWrite(flash_address, Received_Data64) == HAL_OK)
 			{
 				// Send ACK - Write page complete
-				can_ack_flash_complete(frame_number);
+				can_ack_flash_complete(hfdcan, frame_number);
 				// Increment frame number
 				frame_number++;
 				// Set FLASH OK
@@ -359,7 +361,7 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt)
 			} else
 			{
 				// Send error
-				can_error_flash();
+				can_error_flash(hfdcan);
 			}
 		}
 	} // else
