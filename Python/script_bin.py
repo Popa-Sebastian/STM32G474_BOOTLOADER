@@ -1,6 +1,6 @@
 import binascii
 
-# *********************** OPEN FILES FOR READING / WRITING  **********************************************
+# *********************** OPEN FILES FOR READING / WRITING  ********************
 bin_file = input("Enter filename(.bin): ")
 mode = input("Enter mode: Paused or Auto: ")
 
@@ -51,7 +51,7 @@ crc = [0]  # cyclic check
 
 bytes_so_far = 0x0
 
-# ******************************* START READ FROM FILE *********************************************************
+# ******************************* START READ FROM FILE *************************
 while True:
     byte = reader.read(1)  # reads 1 byte from file
     if not byte:
@@ -82,13 +82,14 @@ while True:
         # |            |  |  |  |
         # 100h       1000 8  D 08h 04h 03h 01h 20h 02h 00h 00h Paused ;
         if frames_so_far < 31:
-            can_msg_str = '{}h        {}  8  D {} {} ; \n'.format(ID, Cycle, Payload_str, mode)
+            can_msg_str = '{}h        {}  8  D {} {} ; \n'.format(
+            ID, Cycle, Payload_str, mode)
             can_msg.append(can_msg_str)
             frames_so_far += 1
         else:
             # add the "end of frame" commentary
-            can_msg_str = '{}h        {}  8  D {} {} ; end of frame {}\n'.format(ID, Cycle, Payload_str, mode,
-                                                                                 frame_number)
+            can_msg_str = '{}h        {}  8  D {} {} ; end of frame {}\n'.format(
+            ID, Cycle, Payload_str, mode, frame_number)
             can_msg.append(can_msg_str)
 
             # Visual CRC check after each end of frame:
@@ -101,7 +102,8 @@ while True:
             # 300h        10321  3  D 0h 14h 76h  Paused;
             crc_1 = hex(crc[frame_number])[2:4]
             crc_2 = hex(crc[frame_number])[4:]
-            can_msg_str = '300h        {}  3  D {}h {}h {}h Paused;\n'.format(Cycle+1, frame_number, crc_1, crc_2)
+            can_msg_str = '300h        {}  3  D {}h {}h {}h Paused;\n'.format(
+            Cycle + 1, frame_number, crc_1, crc_2)
             can_msg.append(can_msg_str)
             frames_so_far += 1
 
@@ -118,9 +120,9 @@ while True:
         Cycle = Cycle + delay_between_frames
         index = 0
 
-# **************** END OF FILE READ ******************************************************************
+# **************** END OF FILE READ *******************************************
 
-# **************** COMPLETE THE DATA FRAME ***********************************************************
+# **************** COMPLETE THE DATA FRAME ************************************
 # check to see if the frame is complete (32 data_frames)
 # check to see if there is an incomplete data payload (just 4 bytes)
 if frames_so_far > 0:  # complete the frame with empty bytes (0xFF)
@@ -142,13 +144,14 @@ if frames_so_far > 0:  # complete the frame with empty bytes (0xFF)
         ID = hex(Identifier + index)[2:]
         # create can message (Identifier + Cyle time + DLC + Data payload)
         if frames_so_far < 31:
-            can_msg_str = '{}h        {}  8  D {} {} ; \n'.format(ID, Cycle, Payload_str, mode)
+            can_msg_str = '{}h        {}  8  D {} {} ; \n'.format(
+            ID, Cycle, Payload_str, mode)
             can_msg.append(can_msg_str)
             frames_so_far += 1
             index += 1
         else:
-            can_msg_str = '{}h        {}  8  D {} {} ; end of frame {}\n'.format(ID, Cycle, Payload_str, mode,
-                                                                                 frame_number)
+            can_msg_str = '{}h        {}  8  D {} {} ; end of frame {}\n'.format(
+            ID, Cycle, Payload_str, mode, frame_number)
             can_msg.append(can_msg_str)
             frames_so_far += 1
 
@@ -162,26 +165,28 @@ if frames_so_far > 0:  # complete the frame with empty bytes (0xFF)
         # ID
         ID = hex(Identifier + index)[2:]
         if frames_so_far < 31:
-            can_msg_str = '{}h        {}  8  D {} {} ; \n'.format(ID, Cycle, Payload_str, mode)
+            can_msg_str = '{}h        {}  8  D {} {} ; \n'.format(
+            ID, Cycle, Payload_str, mode)
             can_msg.append(can_msg_str)
             frames_so_far += 1
             index += 1
         else:
             print("CRC", frame_number, "=", hex(crc[frame_number]))
-            can_msg_str = '{}h        {}  8  D {} {} ; end of frame {}\n'.format(ID, Cycle, Payload_str, mode,
-                                                                                 frame_number)
+            can_msg_str = '{}h        {}  8  D {} {} ; end of frame {}\n'.format(
+            ID, Cycle, Payload_str, mode, frame_number)
             can_msg.append(can_msg_str)
             crc_1 = hex(crc[frame_number])[2:4]
             crc_2 = hex(crc[frame_number])[4:]
-            can_msg_str = '300h        {}  3  D {}h {}h {}h Paused;\n'.format(Cycle+1, frame_number, crc_1, crc_2)
+            can_msg_str = '300h        {}  3  D {}h {}h {}h Paused;\n'.format(
+            Cycle + 1, frame_number, crc_1, crc_2)
             can_msg.append(can_msg_str)
             break
 
-# ************************ DATA COMPLETE *****************************************
+# ************************ DATA COMPLETE ***************************************
 
 # jump to user app command
 # 090h           0  0  D ; jump to user app
-can_msg_str = "090h        {}  0  D; jump to user app\n".format(Cycle+1000)
+can_msg_str = "090h        {}  0  D; jump to user app\n".format(Cycle + 1000)
 can_msg.append(can_msg_str)
 
 
