@@ -19,10 +19,11 @@
   * 		[1]: frame_number
   * 		[2]: first byte of CRC
   * 		[3]: second byte of CRC
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	frame_number
   * @retval	None
   */
-void can_ack_page_complete(uint32_t frame_number, uint32_t crc);
+void can_ack_page_complete(FDCAN_HandleTypeDef *hfdcan, uint32_t frame_number, uint32_t crc);
 
 /*********************can_ack_flash_complete************************************
  **
@@ -30,21 +31,23 @@ void can_ack_page_complete(uint32_t frame_number, uint32_t crc);
   * 		ID = 0x400,
   * 		DATA[1]
   * 		[1]: 0xFF
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	frame number to be sent as ACK
   * @retval	None
   */
-void can_ack_flash_complete(uint32_t frame_number);
+void can_ack_flash_complete(FDCAN_HandleTypeDef *hfdcan, uint32_t frame_number);
 
 /***********************can_ack_echo_data***************************************
  **
   * @brief	Sends ack and an echo of the received data
   * 		ID = 0x200 + data_index
   * 		DATA[8] = RxData
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	data_index
   * @param	rxdata_pt points to data to be echoed back
   * @retval	None
   */
-void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt);
+void can_ack_echo_data(FDCAN_HandleTypeDef *hfdcan, uint32_t data_index, uint8_t *rxdata_pt);
 
 /**********************can_error_wrong_index************************************
  **
@@ -54,31 +57,33 @@ void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt);
   * 		[1]: 0xFF
   * 		[2]: expected index
   * 		[3]: received index
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	expected_index
   * @param	received_index
   * @retval	None
   */
-void can_error_wrong_index(uint8_t expected_index, uint8_t received_index);
+void can_error_wrong_index(FDCAN_HandleTypeDef *hfdcan, uint8_t expected_index, uint8_t received_index);
 
 /*************************can_error_flash***************************************
  **
   * @brief	Sends error frame when flash write fails
   * 		ID = 0x7FF
   * 		DATA[1] = 0XFF
-  * @param	None
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @retval	None
   */
-void can_error_flash (void);
+void can_error_flash (FDCAN_HandleTypeDef *hfdcan);
 
 /*************************can_ack_frame_reset***********************************
  **
   * @brief	Sends ack that current frame has been reset
   * 		ID = 0x20
   * 		DATA[1] = frame_number
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	frame number
   * @retval	None
   */
-void can_ack_frame_reset(uint32_t frame_number);
+void can_ack_frame_reset(FDCAN_HandleTypeDef *hfdcan, uint32_t frame_number);
 
 #endif /* INC_CANREPLYMSG_H_ */
 

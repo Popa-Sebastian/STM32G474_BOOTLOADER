@@ -256,7 +256,7 @@ void can_host_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t 
 			// resets current frame to 0
 			crc = 0;
 			current_data_index = 0;
-			can_ack_frame_reset(frame_number);
+			can_ack_frame_reset(hfdcan, frame_number);
 			uart_send_msg("Current frame reset\r\n");
 			break;
 
@@ -308,7 +308,7 @@ void can_data_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t 
 		// Error, data frames not in order
 		uint8_t expected_index = (uint8_t)(current_data_index);
 		uint8_t received_index = (uint8_t)(Identifier - 0x100);
-		can_error_wrong_index(expected_index, received_index);
+		can_error_wrong_index(hfdcan, expected_index, received_index);
 		//
 		sprintf(uart_buffer, "Wrong index!\r\n"
 				"expected ID:0x%x received ID:0x%x\r\n",
@@ -329,7 +329,7 @@ void can_data_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t 
 
 #if USE_CAN_RECEIVE_ACK > 0 // defined in canDriver.h
 		// Send ACK - echo data frames;
-		can_ack_echo_data(current_data_index, rxdata_pt);
+		can_ack_echo_data(hfdcan, current_data_index, rxdata_pt);
 #endif
 
 		// Increment data index
@@ -341,7 +341,7 @@ void can_data_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t 
 			current_data_index = 0;
 
 			// Send ACK - Page complete, 32 values received
-			can_ack_page_complete(frame_number, crc);
+			can_ack_page_complete(hfdcan, frame_number, crc);
 			uart_send_msg("32 values received, 0x300 sent\r\n");
 			// Reset/Set counting variables
 			crc = 0;
@@ -350,7 +350,7 @@ void can_data_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t 
 			if (bootloader_FlashWrite(flash_address, Received_Data64) == HAL_OK)
 			{
 				// Send ACK - Write page complete
-				can_ack_flash_complete(frame_number);
+				can_ack_flash_complete(hfdcan, frame_number);
 				// Increment frame number
 				frame_number++;
 				// Set FLASH OK
@@ -361,7 +361,7 @@ void can_data_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t 
 			} else
 			{
 				// Send error
-				can_error_flash();
+				can_error_flash(hfdcan);
 			}
 		}
 	} // else
