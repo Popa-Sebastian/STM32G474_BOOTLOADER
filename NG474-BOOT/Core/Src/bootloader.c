@@ -44,6 +44,7 @@ void bootloader_JumpToUserApp(uint32_t user_flash)
    //!- Initialize user application's Stack Pointer
    __set_MSP(user_flash);
    SCB->VTOR = 0x8040000;
+   SysTick->CTRL = 0;
    //!- jump to application
    uResetHandler.pfnPointer();
 #ifdef BOOTLOADER_1
