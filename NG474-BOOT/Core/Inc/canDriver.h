@@ -47,20 +47,20 @@ typedef enum
   * 		3) Activates Interrupts
   * 		4) Starts CAN controller
   * 		5) Sends a Hello message (CAN Init OK)
-  * @param	None
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @retval	None
   */
-void can_init(void);
+void can_init(FDCAN_HandleTypeDef *hfdcan);
 
 /************************can_filter_init****************************************
  **
   * @brief	Initializes CAN filters:
   * 		1) Index 0, range 000 - 0FF, Host instructions
   * 		2) Index 1, range 100 - 1FF, Data frames
-  * @param	None
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @retval	None
   */
-void can_filter_init(void);
+void can_filter_init(FDCAN_HandleTypeDef *hfdcan);
 
 /***************************can_data_handler************************************
  **
@@ -73,11 +73,12 @@ void can_filter_init(void);
   * 		4) After 32 data messages have been received, data is stored in flash
   * 		memory at the specified user location. Start and end of flash write
   * 		are confirmed by CAN transmissions.
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	Identifier of the received message (corresponds to Data index)
   * @param  rxdata_pt - pointer to received data to be stored
   * @retval	None
   */
-void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
+void can_data_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t *rxdata_pt);
 
 /***************************can_host_handler************************************
  **
@@ -90,11 +91,12 @@ void can_data_handler(uint32_t Identifier, uint8_t *rxdata_pt);
   *			address, where the user app will be stored.
   *			3) HOST_JUMP_TO_APP: after a successful bootloader and flash of the
   *			of the user app, this command makes the jump to user app.
+  *	@param  FDCAN_HandleTypeDef *hfdcan
   * @param	Identifier corresponds to the command issued by HOST
   * @param  rxdata_pt, pointer to data
   * @retval	None
   */
-void can_host_handler(uint32_t Identifier, uint8_t *rxdata_pt);
+void can_host_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t *rxdata_pt);
 
 #endif /* INC_CANDRIVER_H_ */
 
