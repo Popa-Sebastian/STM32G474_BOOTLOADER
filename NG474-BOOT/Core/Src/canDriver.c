@@ -237,6 +237,7 @@ void can_host_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t 
 	// Check what command it is
 	switch (Identifier)
 		{
+		char uart_buffer[50];
 		case HOST_ENTER_BOOTLOADER:
 			HAL_TIM_Base_Stop_IT(&htim16);                        // Stop timer16
 			uart_send_msg("\r\nBootloader mode\r\n");
@@ -251,6 +252,9 @@ void can_host_handler(FDCAN_HandleTypeDef *hfdcan, uint32_t Identifier, uint8_t 
 			// Change flash address
 			start_of_user_flash = array_to_uint32(rxdata_pt);
 			flash_address = start_of_user_flash;
+			sprintf(uart_buffer, "Flash address init to:0x%x\r\n",
+					(unsigned int) flash_address);
+			uart_send_msg(uart_buffer);
 			break;
 
 		case HOST_RESET_FRAME:
