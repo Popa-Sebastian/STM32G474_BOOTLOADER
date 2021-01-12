@@ -129,12 +129,14 @@ int main(void)
   can_init(&hfdcan1);
   uart_send_msg("\r\nCan init OK\r\n");
 
+  uart_send_msg("\r\nCan init OK\r\n");
   /*
    * Start Timer16:
    * Timer 16 waits for 10 seconds to receive enter bootloader command (0x00)
    * If command is not received, bootloader jumps to user application stored in
    * memory
    */
+  
   uart_send_msg("Starting timer:\r\n");
   start_timer();
   /* USER CODE END 2 */

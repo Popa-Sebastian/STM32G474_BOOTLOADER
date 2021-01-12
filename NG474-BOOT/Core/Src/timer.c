@@ -50,7 +50,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 	 static uint32_t count = 0;
 	 count++;
-	 if (count == 10)
+	 if (count == 20)
 	 {
 		 HAL_TIM_Base_Stop_IT(&htim16);	// stop timer16
 		 HAL_FDCAN_Stop(&hfdcan1);		// stop CAN
