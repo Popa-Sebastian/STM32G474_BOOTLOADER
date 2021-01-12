@@ -126,9 +126,9 @@ int main(void)
    * 3) Start CAN listening
    * 4) Send Hello! message over CAN to HOST application
    */
-  can_init();
-
+  can_init(&hfdcan1);
   uart_send_msg("\r\nCan init OK\r\n");
+
   /*
    * Start Timer16:
    * Timer 16 waits for 10 seconds to receive enter bootloader command (0x00)

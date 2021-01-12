@@ -28,10 +28,11 @@ extern FDCAN_TxHeaderTypeDef TxHeader; // declared in canDriver.c
   * 		[1]: frame_number
   * 		[2]: first byte of CRC
   * 		[3]: second byte of CRC
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	frame_number
   * @retval	None
   */
-void can_ack_page_complete(uint32_t frame_number, uint32_t crc)
+void can_ack_page_complete(FDCAN_HandleTypeDef *hfdcan, uint32_t frame_number, uint32_t crc)
 {
 	uint8_t page_complete_ack[3];
 	uint8_t crc_array[2];
@@ -44,7 +45,7 @@ void can_ack_page_complete(uint32_t frame_number, uint32_t crc)
 	page_complete_ack[0] = frame_number;
 	page_complete_ack[1] = crc_array[0];
 	page_complete_ack[2] = crc_array[1];
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, page_complete_ack);
+	HAL_FDCAN_AddMessageToTxFifoQ(hfdcan, &TxHeader, page_complete_ack);
 }
 
 /*********************can_ack_flash_complete************************************
@@ -53,16 +54,17 @@ void can_ack_page_complete(uint32_t frame_number, uint32_t crc)
   * 		ID = 0x400,
   * 		DATA[1]
   * 		[1]: 0xFF
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	frame number to be sent as ACK
   * @retval	None
   */
-void can_ack_flash_complete(uint32_t frame_number)
+void can_ack_flash_complete(FDCAN_HandleTypeDef *hfdcan, uint32_t frame_number)
 {
 	uint8_t write_complete_ack[1];
 	write_complete_ack[0] = frame_number;
 	TxHeader.Identifier = 0x400;
 	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, write_complete_ack);
+	HAL_FDCAN_AddMessageToTxFifoQ(hfdcan, &TxHeader, write_complete_ack);
 }
 
 /***********************can_ack_echo_data***************************************
@@ -70,15 +72,16 @@ void can_ack_flash_complete(uint32_t frame_number)
   * @brief	Sends ack and an echo of the received data
   * 		ID = 0x200 + data_index
   * 		DATA[8] = RxData
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	data_index
   * @param	rxdata_pt points to data to be echoed back
   * @retval	None
   */
-void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt)
+void can_ack_echo_data(FDCAN_HandleTypeDef *hfdcan, uint32_t data_index, uint8_t *rxdata_pt)
 {
 	TxHeader.Identifier = 0x200 + data_index;
 	TxHeader.DataLength = FDCAN_DLC_BYTES_8;
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, rxdata_pt);
+	HAL_FDCAN_AddMessageToTxFifoQ(hfdcan, &TxHeader, rxdata_pt);
 }
 
 /**********************can_error_wrong_index************************************
@@ -89,11 +92,12 @@ void can_ack_echo_data(uint32_t data_index, uint8_t *rxdata_pt)
   * 		[1]: 0xFF
   * 		[2]: expected index
   * 		[3]: received index
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	expected_index
   * @param	received_index
   * @retval	None
   */
-void can_error_wrong_index(uint8_t expected_index, uint8_t received_index)
+void can_error_wrong_index(FDCAN_HandleTypeDef *hfdcan, uint8_t expected_index, uint8_t received_index)
 {
 	TxHeader.Identifier = 0x2FF;
 	TxHeader.DataLength = FDCAN_DLC_BYTES_3;
@@ -109,15 +113,15 @@ void can_error_wrong_index(uint8_t expected_index, uint8_t received_index)
   * @brief	Sends error frame when flash write fails
   * 		ID = 0x7FF
   * 		DATA[1] = 0XFF
-  * @param	None
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @retval	None
   */
-void can_error_flash (void)
+void can_error_flash (FDCAN_HandleTypeDef *hfdcan)
 {
 	TxHeader.Identifier = 0x7FF;
 	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
 	uint8_t error_flash[1] = {0xFF};
-	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, error_flash);
+	HAL_FDCAN_AddMessageToTxFifoQ(hfdcan, &TxHeader, error_flash);
 }
 
 /*************************can_ack_frame_reset***********************************
@@ -125,10 +129,11 @@ void can_error_flash (void)
   * @brief	Sends ack that current frame has been reset
   * 		ID = 0x20
   * 		DATA[1] = frame_number
+  * @param	FDCAN_HandleTypeDef *hfdcan
   * @param	frame number
   * @retval	None
   */
-void can_ack_frame_reset(uint32_t frame_number)
+void can_ack_frame_reset(FDCAN_HandleTypeDef *hfdcan, uint32_t frame_number)
 {
 	TxHeader.Identifier = 0x20;
 	TxHeader.DataLength = FDCAN_DLC_BYTES_1;
